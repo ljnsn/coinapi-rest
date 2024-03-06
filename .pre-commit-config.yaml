@@ -73,8 +73,8 @@ repos:
     hooks:
       - id: ruff
         name: Fix with ruff
-        entry: ruff
-        args: ["--extend-fixable=ERA001,F401,F841"]
+        entry: ruff check
+        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841"]
         require_serial: true
         language: system
         types: [python]
@@ -85,3 +85,11 @@ repos:
         require_serial: true
         language: system
         types: [python]
+
+      - id: mypy
+        name: Validate types with mypy
+        entry: mypy src tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        files: \.py$
