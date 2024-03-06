@@ -205,3 +205,9 @@ dev = [
     "pre-commit>=3.6.2",
 ]
 
+[tool.pdm.scripts]
+lint = "pre-commit run --all-files --color always"
+test = "coverage run -m pytest"
+# this will run after the `test` command
+post_test = { composite = ["coverage report", "coverage xml"] }
+
