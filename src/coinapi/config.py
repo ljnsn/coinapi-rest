@@ -1,6 +1,8 @@
 """SDK Config."""
 
 from collections.abc import Callable
+from importlib.metadata import version
+from typing import ClassVar
 
 import httpx
 import msgspec
@@ -18,12 +20,13 @@ SERVERS = [
 class CoinAPIConfig(msgspec.Struct):
     """The configuration for the SDK."""
 
+    version: ClassVar[str] = version("coinapi-rest")
+
     client: httpx.Client | None
     security: components.Security | Callable[[], components.Security] | None = None
     server_url: str | None = ""
     server_idx: int | None = 0
     openapi_doc_version: str = "v1"
-    sdk_version: str = "0.0.1"
     user_agent: str = "coinapi-rest/python 0.0.1 CoinAPI v1"
     _hooks: SDKHooks | None = None
 
