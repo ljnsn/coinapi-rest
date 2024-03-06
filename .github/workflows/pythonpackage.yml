@@ -1,0 +1,111 @@
+name: Python package
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  python-lint:
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+        platform: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-root
+      - name: Install pdm
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pdm>=2.11.1
+      - name: Install Dependencies
+        run: python -m pdm install -G lint -G dev
+      - name: Lint
+        run: python -m pdm run lint
+
+  python-test:
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+        platform: [ubuntu-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-root
+      - name: Install pdm
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pdm>=2.11.1
+      - name: Install Dependencies
+        run: python -m pdm install -dG test
+      - name: Test
+        run: python -m pdm run test
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.package }}-${{ matrix.python-version }}
+          path: reports/.coverage
+
+  upload-coverage:
+    runs-on: ubuntu-latest
+    needs: [python-test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: python -m pip install coverage requests tomli
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+      - name: Combine reports
+        run: |
+          coverage combine $(ls **/.coverage)
+          coverage report
+          coverage xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: reports/coverage.xml
+
+  bump-version:
+    runs-on: ubuntu-latest
+    needs: [python-lint, python-test]
+    if: |
+      github.event_name == 'push' &&
+      github.ref_name == 'main' &&
+      github.ref_type == 'branch' &&
+      !startsWith(github.event.head_commit.message, '🔖 bump(release):') &&
+      !startsWith(github.event.head_commit.message, 'bump(release):') &&
+      !startsWith(github.event.head_commit.message, '🔖 bump:') &&
+      !startsWith(github.event.head_commit.message, 'bump:')
+    name: "Bump version and create changelog with commitizen"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+      - name: Create bump and changelog
+        uses: commitizen-tools/commitizen-action@master
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          extra_requirements: "cz-conventional-gitmoji"
