@@ -1,0 +1,9 @@
+# GetV1AssetsRequest
+
+
+## Fields
+
+| Field                                                                                              | Type                                                                                               | Required                                                                                           | Description                                                                                        |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `filter_asset_id`                                                                                  | *Optional[str]*                                                                                    | :heavy_minus_sign:                                                                                 | Comma or semicolon delimited asset identifiers used to filter response. (optional, eg. `BTC;ETH`). |
+| `include_supply`                                                                                   | *Optional[bool]*                                                                                   | :heavy_minus_sign:                                                                                 | Flag indicating whether to include supply information.                                             |

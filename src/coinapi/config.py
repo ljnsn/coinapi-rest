@@ -1,0 +1,43 @@
+"""SDK Config."""
+
+from collections.abc import Callable
+
+import httpx
+import msgspec
+
+from coinapi._hooks import SDKHooks
+from coinapi.models import components
+from coinapi.utils import utils
+
+SERVERS = [
+    "https://rest.coinapi.io",
+]
+"""Contains the list of servers available to the SDK"""
+
+
+class SDKConfiguration(msgspec.Struct):
+    """The configuration for the SDK."""
+
+    client: httpx.Client | None
+    security: components.Security | Callable[[], components.Security] | None = None
+    server_url: str | None = ""
+    server_idx: int | None = 0
+    language: str = "python"
+    openapi_doc_version: str = "v1"
+    sdk_version: str = "0.1.0"
+    user_agent: str = "coinapi-sdk/python 0.1.0 v1 CoinAPI"
+    _hooks: SDKHooks | None = None
+
+    def get_server_details(self) -> tuple[str, dict[str, str]]:
+        """Get the server details."""
+        if self.server_url:
+            return utils.remove_suffix(self.server_url, "/"), {}
+        if self.server_idx is None:
+            self.server_idx = 0
+
+        return SERVERS[self.server_idx], {}
+
+    def get_hooks(self) -> SDKHooks:
+        """Get the hooks."""
+        assert self._hooks is not None  # noqa: S101
+        return self._hooks

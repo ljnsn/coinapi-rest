@@ -1,0 +1,15 @@
+# V1ExchangeRate
+
+Represents an exchange rate.
+
+
+## Fields
+
+| Field                                                                                | Type                                                                                 | Required                                                                             | Description                                                                          |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `time`                                                                               | [date](https://docs.python.org/3/library/datetime.html#date-objects)                 | :heavy_minus_sign:                                                                   | Gets or sets the time of the exchange rate.                                          |
+| `asset_id_base`                                                                      | *Optional[str]*                                                                      | :heavy_minus_sign:                                                                   | Gets or sets the base asset ID of the exchange rate.                                 |
+| `asset_id_quote`                                                                     | *Optional[str]*                                                                      | :heavy_minus_sign:                                                                   | Gets or sets the quote asset ID of the exchange rate.                                |
+| `rate`                                                                               | *Optional[float]*                                                                    | :heavy_minus_sign:                                                                   | Gets or sets the exchange rate value.                                                |
+| `src_side_base`                                                                      | List[[components.ModelVwap24RefRate](../../models/components/modelvwap24refrate.md)] | :heavy_minus_sign:                                                                   | Gets or sets the VWAP24 reference rates for the base asset.                          |
+| `src_side_quote`                                                                     | List[[components.ModelVwap24RefRate](../../models/components/modelvwap24refrate.md)] | :heavy_minus_sign:                                                                   | Gets or sets the VWAP24 reference rates for the quote asset.                         |

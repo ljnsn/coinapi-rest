@@ -1,0 +1,32 @@
+interactions:
+  - request:
+      body:
+      headers:
+        Accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/metrics/exchange/history?exchange_id=BINANCE&limit=100&metric_id=LIQUIDATION_IS_MATCH
+    response:
+      body:
+        string: "{\n  \"error\": \"Metric: LIQUIDATION_IS_MATCH not found mapping for exchange: BINANCE\"\n}"
+      headers:
+        content-type:
+          - application/json
+        date:
+          - Tue, 05 Mar 2024 00:26:42 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+      status:
+        code: 400
+        message: Bad Request
+version: 1

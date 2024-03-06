@@ -1,0 +1,3482 @@
+openapi: 3.0.1
+info:
+  title: REST API
+  description: "\nRESTful endpoint provides the widest range of data, based on HTTP protocol which works in Request-Reply scheme.\n\nImplemented Standards:\n\n * [HTTP1.0](https://datatracker.ietf.org/doc/html/rfc1945)\n * [HTTP1.1](https://datatracker.ietf.org/doc/html/rfc2616)\n * [HTTP2.0](https://datatracker.ietf.org/doc/html/rfc7540)\n * [OpenAPI v3](https://www.openapis.org/)\n\n> **Note:** We adhere to the OpenAPI standards for documenting our API.\n\n## OpenAPI Specification\n\nTo access our API's OpenAPI specification, you can use the following link: [OpenAPI v3](https://raw.githubusercontent.com/coinapi/coinapi-sdk/master/data-api/coinapi-marketdata-rest.yaml)\n\nIf you need to import the OpenAPI file into software like Postman, simply copy and paste the link below:\n```shell\nhttps://raw.githubusercontent.com/coinapi/coinapi-sdk/master/data-api/coinapi-marketdata-rest.yaml\n```\n\n## Endpoints\n\nEnviroment | Encryption | Value \n--- | --- | ---\nProduction | Yes | `https://rest.coinapi.io/`\nProduction | No | `http://rest.coinapi.io/`\n\n:::info\n\nFor real-time market data streaming, you should use WebSockets. REST API only supports pooling, meaning you can periodically request the current market data state. In streaming, you subscribe and data or updates are delivered to you continuously.\n\n:::\n\n## General\n\nIf you want to learn how to authenticate to this API, you can find detailed instructions and guidance in\n[authentication section](/authentication) of this documentation.\n\n### HTTP Requests\n\nEach HTTP request must contain the header ``Accept: application/json`` as all our responses are in JSON format.\n\nWe encourage you to use the HTTP request header ``Accept-Encoding: deflate, gzip`` for all requests. \nThis will indicate to us that we can deliver compressed data to you which on your side should be decompressed transparently.\n\n:::tip\n\nBy allowing data compression you are lowering bandwidth requirements by approximately 80%. \nThis is important for requesting large amounts of data or using WebSocket Streaming API, \nas we can deliver data to you faster and more effectively.\n\n:::\n\n#### HTTP Success\n\nSuccessful HTTP responses have the status code `200` and the body in a format according to documentation of the requested resource.\n\n:::info\n\nYou should always check that your HTTP response status code is equal to 200, otherwise the requested was not successful.\n\n:::\n\n#### HTTP Errors\n\n> Error message is returned in JSON structured like this:\n\n```json\n{\n    \"error\": \"Invalid API key\"\n}\n```\n\nAll HTTP requests with response status codes different to `200` must be considered as failed \nand you should expect additional JSON inside the body of the response with the error message encapsulated inside it as shown in the example.\nWe use the following error codes:\n\nError Code | Meaning\n---------- | -------\n400 | Bad Request -- There is something wrong with your request\n401 | Unauthorized -- Your API key is wrong\n403 | Forbidden -- Your API key doesnt't have enough privileges to access this resource\n429 | Too many requests -- You have exceeded your API key rate limits\n550 | No data -- You requested specific single item that we don't have at this moment.\n\n:::info\n\nGood practice is to store all error messages somewhere along with request data for further manual review.\n\n:::\n\n### Limits\n\nAny authenticated endpoint is providing (in HTTP response headers) information about the current state of the limits associated with API Key. In this section we will describe each limit.\n\n#### Request limit / APIKey\n\n```html\nX-RateLimit-Limit: 1000000\nX-RateLimit-Remaining: 999989\nX-RateLimit-Request-Cost: 1\n```\n\nThe request limit define number of maximum requests that could be executed in the 24 hours period (sliding/rollowing window - always last 24 hours from specific moment) for your subscription.\n\nWe define request as data request credits and this is not always equal to the number of API calls executed against the API. A request is deemed to be a single one if the limit query parameter on the endpoint isn’t available, isn’t used or it's stated otherwise in the API documentation. Otherwise — if the limit query parameter is available and is used — then each of the 100 data points returned in the response is counted as one request.\n\nFor example at the 2019-08-22 13:00 UTC value of the requests remaining (X-RateLimit-Remaining) will be equal to the allocated quota (X-RateLimit-Limit) decreased by the sum of the request costs (SUM(X-RateLimit-Request-Cost)) executed in the period 2019-08-21 13:00 UTC - 2019-08-22 13:00 UTC (last 24 hours).\n\n\nHTTP Header | Type | Description\n---------- | ------- | ---\nX-RateLimit-Used | int | Provides information about the request limit that has been used within the last 24-hour period. This header indicates the amount of request capacity consumed based on the usage history. It is important to note that the header is not always appended to every request to optimize the operation of the API.\nX-RateLimit-Limit | int | Is an optional feature that can be enabled via the customer portal to impose a limit on the capabilities of a specific API key. It allows you to define a threshold for the number of requests that can be made using a single API key within a 24-hour time frame.\nX-RateLimit-Remaining | int | Provides information about the number of requests that can still be made within the last 24-hour period based on the usage history. This header serves as a helpful indicator of the remaining request capacity, allowing API consumers to manage their usage effectively. It is important to note that the header is not always appended to every request to optimize the operation of the API.\nX-RateLimit-Request-Cost | int | The number of requests used to generate current HTTP response.\nX-RateLimit-Quota-Overage | string | Provides information about whether a given API key may exceed the plan quota within a 24-hour time frame, which could result in additional charges. This header is fully defined and configured in the customer portal.\nX-RateLimit-Quota-Allocated | string |  Total number of requests that can be made within a specific subscription during a 24-hour time frame. This quota allocation is determined based on the user's subscription purchase.\nX-RateLimit-Quota-Remaining | string | Provides valuable information about the remaining quota within the subscription for making requests within a 24-hour time frame. This header indicates the number of requests that can still be made within the allocated quota for the current 24-hour period.\n\n```json\nGET v1/exchanges/ECB/apiKey-ED802AF4-E855-YOUR-API-KEY\nHost: coinapi.io\nX-RateLimit-Used: 1000\nX-RateLimit-Limit: 5000\nX-RateLimit-Remaining: 4000\nX-RateLimit-Request-Cost: 1\nX-RateLimit-Quota-Overage: ENABLED\nX-RateLimit-Quota-Allocated: 10000\nX-RateLimit-Quota-Remaining: 5000\n```\n\nExplanation:\n\n- X-RateLimit-Used: 1000 (requests used in the last 24 hours)\n- X-RateLimit-Limit: 5000 (total request limit within a 24-hour time frame)\n- X-RateLimit-Remaining: 4000 (requests remaining within the last 24 hours)\n- X-RateLimit-Request-Cost: 1 (cost or \"weight\" of each individual request)\n- X-RateLimit-Overage: ENABLED (API key may exceed the plan quota within a 24-hour time frame)\n- X-RateLimit-Quota-Allocated: 10000 (total number of requests allowed for all API keys within the subscription within a 24-hour time frame)\n- X-RateLimit-Quota-Remaining: 5000 (requests remaining within the subscription's allocated quota within the last 24 hours)\n\n#### Concurrency limit / APIKey\n\n```html\nX-ConcurrencyLimit-Limit: 10\nX-ConcurrencyLimit-Remaining: 5\n```\n\nThe concurrency limit defines the number of maximum concurrent API calls/requests that the API could process for your subscription at the current moment. Every API call/request increases the Concurrency limit against quota, and when it finishes, decreases it.\n\nHTTP Header | Type | Description\n---------- | ------- | ---\nX-ConcurrencyLimit-Limit | int | Concurrency limit allocated for your API key.\nX-ConcurrencyLimit-Remaining | int | The number of concurrent API calls/requests available to be executed in this moment for your API key.\n\n### Output data format\n\nBy default we are using JSON output data format for all of our endpoints, you can control format of data by using `output_format` variable in query string parameters.\n\n#### URL Parameters\n\nParameter | Type | Description\n---------- | ------- | -------\noutput_format | string | Output data format *(optional, default value is `json`, possible values are `json`, `xml` or `csv`)*\ncsv_include_header | bool | Ignore header line in CSV output? *(optional, default value is `true`, `true` to include CSV header line, `false` otherwise)*\ncsv_include_quotes | bool | Encapsulate strings with quotes in CSV output? *(optional, default value is `false`, `true` to encapsulate all strings with `\"`, `false` to leave them unquoted)*\ncsv_exclude_col | string | Comma delimited list of column names to ignore in CSV output *(optional, by default all columns are included)*\ncsv_set_delimiter | string | Character that will be used as column delimiter in CSV output *(optional, default value is `;`)*\ncsv_set_dec_mark | string | Character that will be used as decimal separator in CSV output *(optional, default value is `.`)*\ncsv_set_timeformat | string | Format for datetime type in CSV output or `unix` for unix timestamp *(optional, default value is `yyyy-MM-ddTHH:mm:ss.fffffffZ`)*\ncsv_set_newline | string | New line type *(optional, default value is `unix`, possible values `win`, `mac`, `unix`)*\n\n### Excel / G-Sheets\n\nThere are several ways to use data from our REST API inside the Excel, Google Sheets, or similar calculation sheet application. This section will do as best as possible to keep all information up to date on how you could load the data into these applications. Feel free to contact support if we are missing an option.\n\n#### CSV download, import:\n\n 1. Open the data in the CSV format from the browser eg. ```https://rest.coinapi.io/v1/exchangerate/USD?apikey=YOUR_API_KEY&invert=true&output_format=csv```\n 2. Save the data to the file with the .csv extension.\n 3. Use the file saved and import it into the software.\n 4. When configuring import, refer to the parameters like delimiter from the [Output data format](#output-data-format)\n\nThe platform-independent way described above is based on CSV but could also be used in other formats like JSON and XML as long as the software support it, but the import procedure needs to be adjusted accordingly.\n\n#### Microsoft Excel\n\n * Use [PowerQuery](https://docs.microsoft.com/en-us/power-query/power-query-what-is-power-query) to load the URL directly into the CSV import without saving the file locally. \n * Use the [=WEBSERVICE](https://support.office.com/en-us/article/webservice-function-0546a35a-ecc6-4739-aed7-c0b7ce1562c4) function to load the API response directly into the sheet, but this will not parse the data; additional processing is required.\n\n#### Google Sheets\n\n * Use [=IMPORT](https://support.google.com/docs/answer/3093335?hl=en) function to load the REST API endpoint and automatically parse the CSV format data into the cells. eg. ```=IMPORTDATA(\"https://rest.coinapi.io/v1/exchangerate/USD?apikey=YOUR_API_KEY&invert=true&output_format=csv```\n\n#### OpenOffice Calc\n\n * Select the menu Insert -> Sheet From File, 2. In the Insert dialog, put the URL eg. ```https://rest.coinapi.io/v1/exchangerate/USD?apikey=YOUR_API_KEY&invert=true&output_format=csv``` in the File Name box at the bottom. Set the drop-down list next to that to Web Page Query and click Open. The Text Import dialog opens where you can change the defaults if needed.\n                    "
+  contact:
+    name: COINAPI LTD
+    url: https://www.coinapi.io
+    email: support@coinapi.io
+  license:
+    name: MIT License
+    url: https://github.com/coinapi/coinapi-sdk/blob/master/LICENSE
+  version: v1
+servers:
+  - url: https://rest.coinapi.io
+paths:
+  /v1/assets:
+    get:
+      tags:
+        - Metadata
+      summary: List all assets
+      description: "Retrieves all assets.\r\n            \r\n:::info\r\nOur asset identifiers are aligned with the ISO 4217 currency codes standard only for fiat money (government or law regulated currency).\r\n:::\r\n            \r\n:::info\r\nProperties of the output are providing aggregated information from across all symbols related to the specific asset. If you need to calculate your aggregation (e.g., limiting only the particular type of symbols), you should use /v1/symbols endpoint as a data source.\r\n:::"
+      parameters:
+        - name: filter_asset_id
+          in: query
+          description: 'Comma or semicolon delimited asset identifiers used to filter response. (optional, eg. `BTC;ETH`).'
+          schema:
+            type: string
+        - name: include_supply
+          in: query
+          description: Flag indicating whether to include supply information.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+  '/v1/assets/{asset_id}':
+    get:
+      tags:
+        - Metadata
+      summary: List all assets by asset ID
+      parameters:
+        - name: asset_id
+          in: path
+          description: The asset ID.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Asset'
+  '/v1/assets/icons/{size}':
+    get:
+      tags:
+        - Metadata
+      summary: List all asset icons
+      description: Gets the list of icons (of the given size) for all the assets.
+      parameters:
+        - name: size
+          in: path
+          description: The size of the icons.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+  '/v1/exchangerate/{asset_id_base}/{asset_id_quote}':
+    get:
+      tags:
+        - Exchange Rates
+      summary: '[exchange rates] Get specific rate'
+      description: "Retrieves the exchange rate for a specific base and quote asset at a given time or the current rate.\r\n            \r\n:::info\r\nIf you are using an exchange rate for mission-critical operations, then for best reliability, you should measure the difference between current time and the time returned from the response to ensure that value of the difference between those meets your internal requirements.\r\n:::"
+      operationId: Get specific rate
+      parameters:
+        - name: asset_id_base
+          in: path
+          description: Requested exchange rate base asset identifier (from the Metadata -> Assets)
+          required: true
+          schema:
+            type: string
+        - name: asset_id_quote
+          in: path
+          description: Requested exchange rate quote asset identifier (from the Metadata -> Assets)
+          required: true
+          schema:
+            type: string
+        - name: time
+          in: query
+          description: 'Time at which exchange rate is calculated (optional, if not supplied then current rate is returned)'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.ExchangeRate'
+              examples:
+                Current rate:
+                  value: {"time": "2024-02-27T12:38:35.4363800Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+                Historical rate:
+                  value: {"time": "2024-02-26T12:38:35.4365750Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.ExchangeRate'
+              examples:
+                Current rate:
+                  value: {"time": "2024-02-27T12:38:35.4363800Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+                Historical rate:
+                  value: {"time": "2024-02-26T12:38:35.4365750Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.ExchangeRate'
+              examples:
+                Current rate:
+                  value: {"time": "2024-02-27T12:38:35.4363800Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+                Historical rate:
+                  value: {"time": "2024-02-26T12:38:35.4365750Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.ExchangeRate'
+              examples:
+                Current rate:
+                  value: {"time": "2024-02-27T12:38:35.4363800Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+                Historical rate:
+                  value: {"time": "2024-02-26T12:38:35.4365750Z", "asset_id_base": "BTC", "asset_id_quote": "USD", "rate": 10000.0}
+  '/v1/exchangerate/{asset_id_base}':
+    get:
+      tags:
+        - Exchange Rates
+      summary: '[exchange rates] Get all current rates'
+      description: "Get the current exchange rate between requested asset and all other assets.\r\n            \r\n:::info\r\nIf you are using an exchange rate for mission-critical operations, then for best reliability, you should measure the difference between current time and the time returned from the response to ensure that value of the difference between those meets your internal requirements.\r\n:::\r\n            \r\n:::info\r\nYou can invert the rates by using Y = 1 / X equation, for example BTC/USD = 1 / (USD/BTC);\r\n:::"
+      parameters:
+        - name: asset_id_base
+          in: path
+          description: Requested exchange rates base asset identifier (from the Metadata -> Assets)
+          required: true
+          schema:
+            type: string
+        - name: filter_asset_id
+          in: query
+          description: Comma or semicolon delimited asset identifiers used to filter response (optional)
+          schema:
+            type: string
+        - name: invert
+          in: query
+          description: 'True will invert all the rates (optional, if true then rates will be calculated as `rate = 1 / actual_rate` eg. `USD/BTC` as `BTC/USD`)'
+          schema:
+            type: boolean
+            default: false
+        - name: time
+          in: query
+          description: Time for historical rates (optional)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesRate'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesRate'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesRate'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesRate'
+  /v1/exchangerate/history/periods:
+    get:
+      tags:
+        - Exchange Rates
+      summary: '[exchange rates] Timeseries periods'
+      description: "You can also obtain historical exchange rates of any asset pair, grouped into time periods.\r\nGet full list of supported time periods available for requesting exchange rates historical timeseries data.\r\n            \r\n## Timeseries periods\r\nTime unit |\tPeriod identifiers\r\n--- | ---\r\nSecond | 1SEC, 2SEC, 3SEC, 4SEC, 5SEC, 6SEC, 10SEC, 15SEC, 20SEC, 30SEC\r\nMinute | 1MIN, 2MIN, 3MIN, 4MIN, 5MIN, 6MIN, 10MIN, 15MIN, 20MIN, 30MIN\r\nHour | 1HRS, 2HRS, 3HRS, 4HRS, 6HRS, 8HRS, 12HRS\r\nDay | 1DAY, 2DAY, 3DAY, 5DAY, 7DAY, 10DAY"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+  '/v1/exchangerate/{asset_id_base}/{asset_id_quote}/history':
+    get:
+      tags:
+        - Exchange Rates
+      summary: '[exchange rates] Timeseries data'
+      description: Get the historical exchange rates between two assets in the form of the timeseries.
+      parameters:
+        - name: asset_id_base
+          in: path
+          description: Requested exchange rates base asset identifier (from the Metadata -> Assets)
+          required: true
+          schema:
+            type: string
+        - name: asset_id_quote
+          in: path
+          description: Requested exchange rates base asset identifier (from the Metadata -> Assets)
+          required: true
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (required, e.g. `5SEC` or `1HRS`)'
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Timeseries starting time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: Timeseries ending time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesTimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesTimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesTimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ExchangeRatesTimeseriesItem'
+  /v1/exchanges:
+    get:
+      tags:
+        - Metadata
+      summary: List all exchanges
+      description: "Get a detailed list of exchanges provided by the system.\r\n            \r\n:::info\r\nProperties of the output are providing aggregated information from across all symbols related to the specific exchange. If you need to calculate your aggregation (e.g., limiting only the particular type of symbols), you should use /v1/symbols endpoint as a data source.\r\n:::"
+      parameters:
+        - name: filter_exchange_id
+          in: query
+          description: 'Comma or semicolon delimited exchange identifiers used to filter response. (optional, eg. `BITSTAMP;GEMINI`)'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+  '/v1/exchanges/{exchange_id}':
+    get:
+      tags:
+        - Metadata
+      summary: List all exchanges by exchange_id
+      parameters:
+        - name: exchange_id
+          in: path
+          description: The ID of the exchange.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Exchange'
+  '/v1/exchanges/icons/{size}':
+    get:
+      tags:
+        - Metadata
+      summary: List of icons for the exchanges
+      parameters:
+        - name: size
+          in: path
+          description: The size of the icons.
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Icon'
+  /v1/indexes:
+    get:
+      tags:
+        - Indexes
+      summary: List of available indexes
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Index'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Index'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Index'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Index'
+    post:
+      tags:
+        - Indexes
+      summary: Create index
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          application/x-msgpack:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+  '/v1/indexes/{index_id}':
+    get:
+      tags:
+        - Indexes
+      summary: Get index data
+      parameters:
+        - name: index_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.IndexData'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexData'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexData'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.IndexData'
+    put:
+      tags:
+        - Indexes
+      summary: Update index
+      parameters:
+        - name: index_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+          application/x-msgpack:
+            schema:
+              $ref: '#/components/schemas/v1.IndexData'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.IndexDataResponse'
+  '/v1/indexes/{index_id}/history':
+    get:
+      tags:
+        - Indexes
+      summary: Retrieve Historical Index Value and Composition
+      parameters:
+        - name: index_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexValue'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexValue'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexValue'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexValue'
+  '/v1/indexes/{index_id}/timeseries':
+    get:
+      tags:
+        - Indexes
+      summary: Retrieve Historical Index Value Timeseries
+      parameters:
+        - name: index_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+  '/v1/indexes/{index_id}/timeseries/TO_BE_ANNOUNCED':
+    get:
+      tags:
+        - Indexes
+      summary: "Retrieve Historical Composition Value Timeseries\r\nRetrieves historical timeseries for the specific composition value for an index"
+      parameters:
+        - name: index_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: source_id
+          in: query
+          schema:
+            type: string
+        - name: source_type
+          in: query
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.IndexTimeseriesItem'
+  /v1/metadata:
+    get:
+      tags:
+        - Metadata
+      summary: Base url of the API.
+      responses:
+        '200':
+          description: Success
+  /v1/metrics/listing:
+    get:
+      tags:
+        - Metrics
+      summary: Listing of all supported metrics by CoinAPI
+      description: Get all data metrics.
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Metric'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Metric'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Metric'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Metric'
+  /v1/metrics/exchange/listing:
+    get:
+      tags:
+        - Metrics
+      summary: Listing of all supported exchange metrics
+      description: Get data metrics for exchange.
+      parameters:
+        - name: metric_id
+          in: query
+          description: The metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: The exchange identifier (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+  /v1/metrics/exchange/current:
+    get:
+      tags:
+        - Metrics
+      summary: Current metrics for given exchange
+      description: Get current exchange metrics values.
+      parameters:
+        - name: metric_id
+          in: query
+          description: The metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: The exchange identifier (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+  /v1/metrics/exchange/history:
+    get:
+      tags:
+        - Metrics
+      summary: Historical metrics for the exchange
+      description: Get exchange metrics history.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          required: true
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange identifier (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Ending time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_format
+          in: query
+          description: 'If set, returned values will be in unix timestamp format (valid values: unix_sec, unix_millisec, unix_microsec, unix_nanosec)'
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (e.g. `5SEC` or `2MTH`), default value is `1SEC`'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+  /v1/metrics/symbol/listing:
+    get:
+      tags:
+        - Metrics
+      summary: Listing of all supported metrics for symbol
+      description: Get data metrics for symbol.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange identifier (from the Metadata -> Exchanges)
+          schema:
+            type: string
+        - name: symbol_id
+          in: query
+          description: Symbol identifier (from the Metadata -> Symbols)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+  /v1/metrics/symbol/current:
+    get:
+      tags:
+        - Metrics
+      summary: Current metrics for given symbol
+      description: Get current symbol metrics.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: symbol_id
+          in: query
+          description: Symbol identifier (from the Metadata -> Symbols)
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange id (from the Metadata -> Exchanges)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+  /v1/metrics/symbol/history:
+    get:
+      tags:
+        - Metrics
+      summary: Historical metrics for symbol
+      description: Get symbol metrics history.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          required: true
+          schema:
+            type: string
+        - name: symbol_id
+          in: query
+          description: Symbol identifier (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Ending time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_format
+          in: query
+          description: 'If set, returned values will be in unix timestamp format (valid values: unix_sec, unix_millisec, unix_microsec, unix_nanosec)'
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (e.g. `5SEC` or `2MTH`), default value is `1SEC`'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+  /v1/metrics/asset/listing:
+    get:
+      tags:
+        - Metrics
+      summary: Listing of all supported metrics for asset
+      description: Get data metrics for asset.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange identifier (from the Metadata -> Exchanges)
+          schema:
+            type: string
+        - name: chain_id
+          in: query
+          description: Chain identifier
+          schema:
+            type: string
+        - name: network_id
+          in: query
+          description: Network identifier
+          schema:
+            type: string
+        - name: asset_id
+          in: query
+          description: Asset identifier (from the Metadata -> Assets)
+          schema:
+            type: string
+        - name: asset_id_external
+          in: query
+          description: The asset external identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.ListingItem'
+  /v1/metrics/asset/current:
+    get:
+      tags:
+        - Metrics
+      summary: Current metrics for given asset
+      description: Get current asset metrics.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          schema:
+            type: string
+        - name: asset_id
+          in: query
+          description: Asset identifier (from the Metadata -> Assets)
+          schema:
+            type: string
+        - name: asset_id_external
+          in: query
+          description: Exchange asset identifier
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange identifier (from the Metadata -> Exchanges)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.GeneralData'
+  /v1/metrics/asset/history:
+    get:
+      tags:
+        - Metrics
+      summary: Historical metrics for asset
+      description: Get asset metrics history.
+      parameters:
+        - name: metric_id
+          in: query
+          description: Metric identifier (from the Metrics -> Listing)
+          required: true
+          schema:
+            type: string
+        - name: asset_id
+          in: query
+          description: Asset identifier (from the Metadata -> Assets)
+          schema:
+            type: string
+        - name: asset_id_external
+          in: query
+          description: Exchange asset identifier
+          schema:
+            type: string
+        - name: exchange_id
+          in: query
+          description: Exchange identifier (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_end
+          in: query
+          description: Ending time in ISO 8601
+          schema:
+            type: string
+            format: date-time
+        - name: time_format
+          in: query
+          description: 'If set, returned values will be in unix timestamp format (valid values: unix_sec, unix_millisec, unix_microsec, unix_nanosec)'
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (e.g. `5SEC` or `2MTH`), default value is `1SEC`'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.MetricData'
+  '/v1/orderbooks/{symbol_id}/depth/current':
+    get:
+      tags:
+        - Order Book
+      summary: '[order book] Current depth of the order book'
+      description: Retrieves the current depth of the order book for the specified symbol.
+      parameters:
+        - name: symbol_id
+          in: path
+          description: The symbol ID (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit_levels
+          in: query
+          description: The maximum number of levels to include in the response.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookDepth'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookDepth'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookDepth'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookDepth'
+  '/v1/orderbooks/{symbol_id}/history':
+    get:
+      tags:
+        - Order Book
+      summary: '[order book] Historical data'
+      description: "Get historical order book snapshots for a specific symbol within time range, returned in time ascending order.\r\n            \r\n:::info\r\nThe historical order book data via the REST API is currently limited by a number of updates and to the maximum number of 20 levels.\r\n:::"
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier for requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: 'Timeseries ending time in ISO 8601 (optional, if not supplied then the data is returned to the end or when result elements count reaches the limit)'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: limit_levels
+          in: query
+          description: Maximum amount of levels from each side of the book to include in response (optional)
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+  '/v1/orderbooks/{symbol_id}/current':
+    get:
+      tags:
+        - Order Book
+      summary: Get current order book
+      description: Retrieves the current order book for the specified symbol.
+      parameters:
+        - name: symbol_id
+          in: path
+          description: The symbol ID (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit_levels
+          in: query
+          description: The maximum number of levels to include in the response.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+  '/v1/orderbooks/{symbol_id}/latest':
+    get:
+      tags:
+        - Order Book
+      summary: '[order book] Latest data'
+      description: "Get latest order book snapshots for a specific symbol, returned in time descending order.\r\n            \r\n:::info\r\nThe historical order book data via the REST API is currently limited by a number of updates and to the maximum number of 20 levels.\r\n:::"
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier of requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: limit_levels
+          in: query
+          description: Maximum amount of levels from each side of the book to include in response (optional)
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBook'
+  /v1/orderbooks3/current:
+    get:
+      tags:
+        - Order Book L3
+      summary: '[order book l3] Current order books'
+      parameters:
+        - name: filter_symbol_id
+          in: query
+          description: Comma or semicolon delimited parts of symbol identifier used to filter the response.
+          schema:
+            type: string
+        - name: limit_levels
+          in: query
+          description: The maximum number of levels to include in the response.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBookBase'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBookBase'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBookBase'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.OrderBookBase'
+  '/v1/orderbooks3/{symbol_id}/current':
+    get:
+      tags:
+        - Order Book L3
+      summary: '[order book l3] Current order book by symbol_id'
+      description: Retrieves the current order book for the specified symbol.
+      parameters:
+        - name: symbol_id
+          in: path
+          description: The symbol ID (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit_levels
+          in: query
+          description: The maximum number of levels to include in the response.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.OrderBookBase'
+  '/v1/quotes/{symbol_id}/history':
+    get:
+      tags:
+        - Quotes
+      summary: '[quotes] Historical data'
+      description: 'Get historical quote updates within requested time range, returned in time ascending order.'
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier for requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: 'Timeseries ending time in ISO 8601 (optional, if not supplied then the data is returned to the end or when result elements count reaches the limit)'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, minimum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+  /v1/quotes/current:
+    get:
+      tags:
+        - Quotes
+      summary: '[quotes] Current data'
+      description: "Get current quotes for all symbols or for a specific symbol.\r\n            \r\n:::info\r\nWhen requesting current data for a specific symbol, output is not encapsulated into JSON array as only one item is returned.\r\n:::"
+      parameters:
+        - name: filter_symbol_id
+          in: query
+          description: Comma or semicolon delimited parts of symbol identifier used to filter response. (optional)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.QuoteTrade'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.QuoteTrade'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.QuoteTrade'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.QuoteTrade'
+  '/v1/quotes/{symbol_id}/current':
+    get:
+      tags:
+        - Quotes
+      summary: '[quotes] Current quotes for a specific symbol'
+      parameters:
+        - name: symbol_id
+          in: path
+          description: The symbol identifier (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/v1.QuoteTrade'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/v1.QuoteTrade'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/v1.QuoteTrade'
+            application/x-msgpack:
+              schema:
+                $ref: '#/components/schemas/v1.QuoteTrade'
+  /v1/quotes/latest:
+    get:
+      tags:
+        - Quotes
+      summary: '[quotes] Latest data'
+      description: Get latest updates of the quotes up to 1 minute ago. Latest data is always returned in time descending order.
+      parameters:
+        - name: filter_symbol_id
+          in: query
+          description: Comma or semicolon delimited parts of symbol identifier used to filter response. (optional)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+  '/v1/quotes/{symbol_id}/latest':
+    get:
+      tags:
+        - Quotes
+      summary: '[quotes] Latest quote updates for a specific symbol'
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier of requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Quote'
+  /v1/symbols:
+    get:
+      tags:
+        - Metadata
+      summary: List all symbols
+      description: "Retrieves all symbols with optional filtering.\r\n            \r\n:::info\r\n\"price_precision\" and \"size_precision\" are data precisions and are not always the same precisions used for trading eg. for the \"BINANCE\" exchanges.\r\n:::\r\n            \r\n:::info\r\nYou should not assume that the market data will be always within the resolution provided by the \"price_precision\" and \"size_precision\". The fact that the precision values can be derived from a posterior implies the fact that this data could be delayed, also it can be changed by the data source without notice and we will immediately deliver data with the new precision while could not update the precision values in this endpoint immediately.\r\n:::\r\n            \r\n### Symbol identifier\r\n            \r\nOur symbol identifier is created using a pattern that depends on symbol type.\r\n            \r\nType | `symbol_id` pattern\r\n--------- | ---------\r\nSPOT | `{exchange_id}_SPOT_{asset_id_base}_{asset_id_quote}`\r\nFUTURES | `{exchange_id}_FTS_{asset_id_base}_{asset_id_quote}_{YYMMDD of future_delivery_time}`\r\nOPTION | `{exchange_id}_OPT_{asset_id_base}_{asset_id_quote}_{YYMMDD of option_expiration_time}_{option_strike_price}_{option_type_is_call as C/P}`\r\nPERPETUAL | `{exchange_id}_PERP_{asset_id_base}_{asset_id_quote}`\r\nINDEX | `{exchange_id}_IDX_{index_id}`\r\nCREDIT | `{exchange_id}_CRE_{asset_id_base}`\r\nCONTACT  | `{exchange_id}_COT_{contract_id}`\r\n            \r\n:::info\r\nIn the unlikely event when the \"symbol_id\" for more than one market is the same. We will append the additional term (prefixed with the \"_\") at the end of the duplicated identifiers to differentiate them.\r\n:::info\r\n            \r\n### Symbol types list (enumeration of `symbol_type` output variable)\r\n            \r\nType | Name | Description\r\n-------- | - | -----------\r\nSPOT | FX Spot | Agreement to exchange one asset for another one *(e.g. Buy BTC for USD)*\r\nFUTURES | Futures contract | FX Spot derivative contract where traders agree to trade fx spot at predetermined future time\r\nOPTION | Option contract | FX Spot derivative contract where traders agree to trade right to require buy or sell of fx spot at agreed price on exercise date\r\nPERPETUAL | Perpetual contract | FX Spot derivative contract where traders agree to trade fx spot continously without predetermined future delivery time\r\nINDEX | Index | Statistical composite that measures changes in the economy or markets.\r\nCREDIT | Credit/Funding | Margin funding contract. Order book displays lending offers and borrow bids. Price represents the daily rate.\r\nCONTRACT | Contract | Represents other types of financial instruments *(e.g. spreads, interest rate swap)*\r\n            \r\n### Additional output variables for `symbol_type = INDEX`\r\n            \r\nVariable | Description\r\n--------- | -----------\r\nindex_id | Index identifier\r\nindex_display_name | Human readable name of the index *(optional)*\r\nindex_display_description | Description of the index *(optional)*\r\n            \r\n### Additional output variables for `symbol_type = FUTURES`\r\n            \r\nVariable | Description\r\n--------- | -----------\r\nfuture_delivery_time | Predetermined time of futures contract delivery date in ISO 8601\r\nfuture_contract_unit | Contact size *(eg. 10 BTC if `future_contract_unit` = `10` and `future_contract_unit_asset` = `BTC`)*\r\nfuture_contract_unit_asset | Identifier of the asset used to denominate the contract unit\r\n            \r\n### Additional output variables for `symbol_type = PERPETUAL`\r\n            \r\nVariable | Description\r\n--------- | -----------\r\nfuture_contract_unit | Contact size *(eg. 10 BTC if `future_contract_unit` = `10` and `future_contract_unit_asset` = `BTC`)*\r\nfuture_contract_unit_asset | Identifier of the asset used to denominate the contract unit\r\n            \r\n### Additional output variables for `symbol_type = OPTION`\r\n            \r\nVariable | Description\r\n--------- | -----------\r\noption_type_is_call | Boolean value representing option type. `true` for Call options, `false` for Put options\r\noption_strike_price | Price at which option contract can be exercised\r\noption_contract_unit | Base asset amount of underlying spot which single option represents\r\noption_exercise_style | Option exercise style. Can be `EUROPEAN` or `AMERICAN`\r\noption_expiration_time | Option contract expiration time in ISO 8601\r\n            \r\n### Additional output variables for `symbol_type = CONTRACT`\r\n            \r\nVariable | Description\r\n--------- | -----------\r\ncontract_delivery_time | Predetermined time of contract delivery date in ISO 8601\r\ncontract_unit | Contact size *(eg. 10 BTC if `contract_unit` = `10` and `contract_unit_asset` = `BTC`)*\r\ncontract_unit_asset | Identifier of the asset used to denominate the contract unit\r\ncontract_id | Identifier of contract by the exchange"
+      parameters:
+        - name: filter_symbol_id
+          in: query
+          description: 'Comma or semicolon delimited parts of symbol identifier used to filter response. (optional, eg. `BITSTAMP`_ or `BINANCE_SPOT_`)'
+          schema:
+            type: string
+        - name: filter_exchange_id
+          in: query
+          description: The filter for exchange ID.
+          schema:
+            type: string
+        - name: filter_asset_id
+          in: query
+          description: The filter for asset ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+  '/v1/symbols/map/{exchange_id}':
+    get:
+      tags:
+        - Metadata
+      summary: List symbol mapping for the exchange
+      parameters:
+        - name: exchange_id
+          in: path
+          description: The ID of the exchange (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.SymbolMapping'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.SymbolMapping'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.SymbolMapping'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.SymbolMapping'
+  '/v1/symbols/{exchange_id}':
+    get:
+      tags:
+        - Metadata
+      summary: List of symbols for the exchange
+      parameters:
+        - name: exchange_id
+          in: path
+          description: The ID of the exchange (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+        - name: filter_symbol_id
+          in: query
+          description: The filter for symbol ID.
+          schema:
+            type: string
+        - name: filter_asset_id
+          in: query
+          description: The filter for asset ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Symbol'
+  /v1/ohlcv/periods:
+    get:
+      tags:
+        - Ohlcv
+      summary: '[ohlcv] List all periods'
+      description: "Get full list of supported time periods available for requesting OHLCV timeseries data.\r\n            \r\n### Available periods\r\n            \r\nTime unit | Period identifiers\r\n--------- | -----------\r\nSecond | 1SEC, 2SEC, 3SEC, 4SEC, 5SEC, 6SEC, 10SEC, 15SEC, 20SEC, 30SEC\r\nMinute | 1MIN, 2MIN, 3MIN, 4MIN, 5MIN, 6MIN, 10MIN, 15MIN, 20MIN, 30MIN\r\nHour | 1HRS, 2HRS, 3HRS, 4HRS, 6HRS, 8HRS, 12HRS\r\nDay | 1DAY, 2DAY, 3DAY, 5DAY, 7DAY, 10DAY\r\nMonth | 1MTH, 2MTH, 3MTH, 4MTH, 6MTH\r\nYear | 1YRS, 2YRS, 3YRS, 4YRS, 5YRS\r\n            \r\n:::tip\r\nYou can assume that we will not remove any periods from this response, however, we may add new ones.\r\n:::"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesPeriod'
+  '/v1/ohlcv/{symbol_id}/history':
+    get:
+      tags:
+        - Ohlcv
+      summary: '[ohlcv] Historical data'
+      description: "Get OHLCV timeseries data returned in time ascending order. Data can be requested by the period and for the specific symbol eg `BITSTAMP_SPOT_BTC_USD`, if you need to query timeseries by asset pairs eg. `BTC/USD`, then please reffer to the Exchange Rates Timeseries data\r\n            \r\n:::info\r\nThe OHLCV Historical endpoint data can be delayed a few seconds. Use OHLCV Latest endpoint to get real-time data without delay.\r\n:::"
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier of requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (required, e.g. `5SEC` or `2MTH`)'
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Timeseries starting time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: 'Timeseries ending time in ISO 8601 (optional, if not supplied then the data is returned to the end or when count of result elements reaches the limit)'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: include_empty_items
+          in: query
+          description: 'Include items with no activity? (optional, default value is `false`, possible values are `true` or `false`)'
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+  '/v1/ohlcv/exchanges/{exchange_id}/history':
+    get:
+      tags:
+        - Ohlcv
+      summary: '[ohlcv] Historical data by exchange'
+      description: "Get OHLCV timeseries data returned in time ascending order. Data can be requested by the period and for the specific exchange eg `BITSTAMP`\r\n            \r\n:::info\r\nThe OHLCV Historical endpoint data can be delayed a few seconds.\r\n`time_start` and `time_end` must point to the same day\r\n:::"
+      parameters:
+        - name: exchange_id
+          in: path
+          description: Exchange identifier of requested timeseries (from the Metadata -> Exchanges)
+          required: true
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: Identifier of requested timeseries period (e.g. `5SEC` or `2MTH`)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Timeseries starting time in ISO 8601
+          required: true
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: Timeseries ending time in ISO 8601
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.ExchangeTimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.ExchangeTimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.ExchangeTimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.ExchangeTimeseriesItem'
+  '/v1/ohlcv/{symbol_id}/latest':
+    get:
+      tags:
+        - Ohlcv
+      summary: '[ohlcv] Latest data'
+      description: "Get OHLCV latest timeseries data returned in time descending order. Data can be requested by the period and for the specific symbol eg `BITSTAMP_SPOT_BTC_USD`, if you need to query timeseries by asset pairs eg. `BTC/USD`, then please reffer to the Exchange Rates Timeseries data\r\n            \r\n:::info\r\nOHLCV Latest endpoint is providing real-time data without delay. The OHLCV Historical endpoint data can be delayed a few seconds.\r\n:::"
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier of requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: period_id
+          in: query
+          description: 'Identifier of requested timeseries period (required, e.g. `5SEC` or `2MTH`)'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: include_empty_items
+          in: query
+          description: 'Include items with no activity? (optional, default value is `false`, possible values are `true` or `false`)'
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.TimeseriesItem'
+  '/v1/trades/{symbol_id}/history':
+    get:
+      tags:
+        - Trades
+      summary: '[trades] Historical data'
+      description: 'Get history transactions from specific symbol, returned in time ascending order.'
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier for requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: time_start
+          in: query
+          description: Starting time in ISO 8601 (required)
+          schema:
+            type: string
+        - name: time_end
+          in: query
+          description: 'Timeseries ending time in ISO 8601 (optional, if not supplied then the data is returned to the end or when result elements count reaches the limit)'
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: include_id
+          in: query
+          description: Information that additional exchange trade identifier should be included in the `id_trade` parameter of the trade if exchange providing identifiers.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+  '/v1/trades/{symbol_id}/latest':
+    get:
+      tags:
+        - Trades
+      summary: '[trades] Latest data by symbol_id'
+      description: Get latest trades executed up to 1 minute ago. Latest data is always returned in time descending order.
+      parameters:
+        - name: symbol_id
+          in: path
+          description: Symbol identifier for requested timeseries (from the Metadata -> Symbols)
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+        - name: include_id
+          in: query
+          description: Information that additional exchange trade identifier should be included in the `id_trade` parameter of the trade if exchange providing identifiers.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+  /v1/trades/latest:
+    get:
+      tags:
+        - Trades
+      summary: '[trades] Latest data'
+      description: Get latest trades executed up to 1 minute ago. Latest data is always returned in time descending order.
+      parameters:
+        - name: filter_symbol_id
+          in: query
+          description: Comma or semicolon delimited parts of symbol identifier used to filter response. (optional)
+          schema:
+            type: string
+        - name: include_id
+          in: query
+          description: Information that additional exchange trade identifier should be included in the `id_trade` parameter of the trade if exchange providing identifiers.
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          description: 'Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)'
+          schema:
+            type: integer
+            format: int32
+            default: 100
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+            application/x-msgpack:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/v1.Trade'
+components:
+  schemas:
+    Model.VWAP24RefRate:
+      type: object
+      properties:
+        time:
+          type: string
+          format: date-time
+        asset:
+          type: string
+          nullable: true
+        rate:
+          type: number
+          format: double
+        volume:
+          type: number
+          format: double
+      additionalProperties: false
+    Models.ExchangeTimeseriesItem:
+      type: object
+      properties:
+        time_period_start:
+          type: string
+          description: The start time of the time period.
+          format: date-time
+        time_period_end:
+          type: string
+          description: The end time of the time period.
+          format: date-time
+        time_open:
+          type: string
+          description: The time when the price opened.
+          format: date-time
+          nullable: true
+        time_close:
+          type: string
+          description: The time when the price closed.
+          format: date-time
+          nullable: true
+        price_open:
+          type: number
+          description: The opening price.
+          format: double
+          nullable: true
+        price_high:
+          type: number
+          description: The highest price during the time period.
+          format: double
+          nullable: true
+        price_low:
+          type: number
+          description: The lowest price during the time period.
+          format: double
+          nullable: true
+        price_close:
+          type: number
+          description: The closing price.
+          format: double
+          nullable: true
+        volume_traded:
+          type: number
+          description: The total volume traded during the time period.
+          format: double
+        trades_count:
+          type: integer
+          description: The number of trades executed during the time period.
+          format: int64
+        symbol_id_exchange:
+          type: string
+          nullable: true
+        symbol_id_coinapi:
+          type: string
+          nullable: true
+      additionalProperties: false
+      description: Represents a timeseries item with price and volume information.
+    v1.Asset:
+      type: object
+      properties:
+        asset_id:
+          type: string
+          description: Gets or sets the asset ID.
+          nullable: true
+        name:
+          type: string
+          description: Gets or sets the name of the asset.
+          nullable: true
+        type_is_crypto:
+          type: integer
+          description: Gets or sets a value indicating whether the asset is a cryptocurrency.
+          format: int32
+        data_quote_start:
+          type: string
+          description: Gets or sets the start date of quote data.
+          format: date-time
+          nullable: true
+        data_quote_end:
+          type: string
+          description: Gets or sets the end date of quote data.
+          format: date-time
+          nullable: true
+        data_orderbook_start:
+          type: string
+          description: Gets or sets the start date of order book data.
+          format: date-time
+          nullable: true
+        data_orderbook_end:
+          type: string
+          description: Gets or sets the end date of order book data.
+          format: date-time
+          nullable: true
+        data_trade_start:
+          type: string
+          description: Gets or sets the start date of trade data.
+          format: date-time
+          nullable: true
+        data_trade_end:
+          type: string
+          description: Gets or sets the end date of trade data.
+          format: date-time
+          nullable: true
+        data_symbols_count:
+          type: integer
+          description: Gets or sets the number of symbols.
+          format: int64
+          nullable: true
+        volume_1hrs_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 hour.
+          format: double
+          nullable: true
+        volume_1day_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 day.
+          format: double
+          nullable: true
+        volume_1mth_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 month.
+          format: double
+          nullable: true
+        price_usd:
+          type: number
+          description: Gets or sets the USD price of the asset.
+          format: double
+          nullable: true
+        id_icon:
+          type: string
+          description: Gets or sets the ID of the icon for the asset.
+          format: uuid
+          nullable: true
+        supply_current:
+          type: number
+          description: Gets or sets the current supply of the asset.
+          format: double
+          nullable: true
+        supply_total:
+          type: number
+          description: Gets or sets the total supply of the asset.
+          format: double
+          nullable: true
+        supply_max:
+          type: number
+          description: Gets or sets the maximum supply of the asset.
+          format: double
+          nullable: true
+        data_start:
+          type: string
+          nullable: true
+          readOnly: true
+        data_end:
+          type: string
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+      description: Represents an asset.
+    v1.Exchange:
+      type: object
+      properties:
+        exchange_id:
+          type: string
+          description: Gets or sets the exchange ID.
+          nullable: true
+        website:
+          type: string
+          description: Gets or sets the website URL of the exchange.
+          nullable: true
+        name:
+          type: string
+          description: Gets or sets the name of the exchange.
+          nullable: true
+        data_start:
+          type: string
+          nullable: true
+          readOnly: true
+        data_end:
+          type: string
+          nullable: true
+          readOnly: true
+        data_quote_start:
+          type: string
+          description: Gets or sets the start date of quote data.
+          format: date-time
+          nullable: true
+        data_quote_end:
+          type: string
+          description: Gets or sets the end date of quote data.
+          format: date-time
+          nullable: true
+        data_orderbook_start:
+          type: string
+          description: Gets or sets the start date of order book data.
+          format: date-time
+          nullable: true
+        data_orderbook_end:
+          type: string
+          description: Gets or sets the end date of order book data.
+          format: date-time
+          nullable: true
+        data_trade_start:
+          type: string
+          description: Gets or sets the start date of trade data.
+          format: date-time
+          nullable: true
+        data_trade_end:
+          type: string
+          description: Gets or sets the end date of trade data.
+          format: date-time
+          nullable: true
+        data_trade_count:
+          type: integer
+          description: Gets or sets the number of trades.
+          format: int64
+          nullable: true
+        data_symbols_count:
+          type: integer
+          description: Gets or sets the number of symbols.
+          format: int64
+          nullable: true
+        volume_1hrs_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 hour.
+          format: double
+          nullable: true
+        volume_1day_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 day.
+          format: double
+          nullable: true
+        volume_1mth_usd:
+          type: number
+          description: Gets or sets the USD volume in the last 1 month.
+          format: double
+          nullable: true
+        metric_id:
+          type: array
+          items:
+            type: string
+          description: Gets or sets the list of metric IDs.
+          nullable: true
+        icons:
+          type: array
+          items:
+            $ref: '#/components/schemas/v1.Icon'
+          description: Gets or sets the list of icons for the exchange.
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+      description: Represents an exchange.
+    v1.ExchangeRate:
+      type: object
+      properties:
+        time:
+          type: string
+          description: Gets or sets the time of the exchange rate.
+          format: date-time
+        asset_id_base:
+          type: string
+          description: Gets or sets the base asset ID of the exchange rate.
+          nullable: true
+        asset_id_quote:
+          type: string
+          description: Gets or sets the quote asset ID of the exchange rate.
+          nullable: true
+        rate:
+          type: number
+          description: Gets or sets the exchange rate value.
+          format: double
+        src_side_base:
+          type: array
+          items:
+            $ref: '#/components/schemas/Model.VWAP24RefRate'
+          description: Gets or sets the VWAP24 reference rates for the base asset.
+          nullable: true
+        src_side_quote:
+          type: array
+          items:
+            $ref: '#/components/schemas/Model.VWAP24RefRate'
+          description: Gets or sets the VWAP24 reference rates for the quote asset.
+          nullable: true
+      additionalProperties: false
+      description: Represents an exchange rate.
+    v1.ExchangeRatesRate:
+      type: object
+      properties:
+        time:
+          type: string
+          description: Gets or sets the time of the exchange rate.
+          format: date-time
+        asset_id_quote:
+          type: string
+          description: Gets or sets the quote asset ID of the exchange rate.
+          nullable: true
+        rate:
+          type: number
+          description: Gets or sets the exchange rate value.
+          format: double
+      additionalProperties: false
+      description: Represents an exchange rate within a collection of exchange rates.
+    v1.ExchangeRatesTimeseriesItem:
+      type: object
+      properties:
+        time_period_start:
+          type: string
+          description: Gets or sets the start time of the period.
+          format: date-time
+        time_period_end:
+          type: string
+          description: Gets or sets the end time of the period.
+          format: date-time
+        time_open:
+          type: string
+          description: Gets or sets the opening time of the period.
+          format: date-time
+          nullable: true
+        time_close:
+          type: string
+          description: Gets or sets the closing time of the period.
+          format: date-time
+          nullable: true
+        rate_open:
+          type: number
+          description: Gets or sets the opening rate for the period.
+          format: double
+          nullable: true
+        rate_high:
+          type: number
+          description: Gets or sets the highest rate for the period.
+          format: double
+          nullable: true
+        rate_low:
+          type: number
+          description: Gets or sets the lowest rate for the period.
+          format: double
+          nullable: true
+        rate_close:
+          type: number
+          description: Gets or sets the closing rate for the period.
+          format: double
+          nullable: true
+      additionalProperties: false
+      description: Represents an item in the exchange rate timeseries.
+    v1.GeneralData:
+      type: object
+      properties:
+        entry_time:
+          type: string
+          description: Gets or sets the entry time for the data point.
+          format: date-time
+        recv_time:
+          type: string
+          description: Gets or sets the received time for the data point.
+          format: date-time
+        exchange_id:
+          type: string
+          description: Gets or sets the identifier for the exchange.
+          nullable: true
+        asset_id:
+          type: string
+          description: Gets or sets the identifier for the asset.
+          nullable: true
+        symbol_id:
+          type: string
+          description: Gets or sets the identifier for the symbol.
+          nullable: true
+        metric_id:
+          type: string
+          description: Gets or sets the identifier for the metric.
+          nullable: true
+        value_decimal:
+          type: number
+          description: Gets or sets the decimal value for the metric.
+          format: double
+          nullable: true
+        value_text:
+          type: string
+          description: Gets or sets the textual representation of the value for the metric.
+          nullable: true
+        value_time:
+          type: string
+          description: Gets or sets the timestamp value for the metric.
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: Class representation of general metric data. This class is an XML type with name 'general_data' and inherits from the BaseCsvModel class.
+    v1.Icon:
+      type: object
+      properties:
+        exchange_id:
+          type: string
+          description: Gets or sets the exchange ID associated with the icon.
+          nullable: true
+        asset_id:
+          type: string
+          description: Gets or sets the asset ID associated with the icon.
+          nullable: true
+        url:
+          type: string
+          description: Gets or sets the URL of the icon.
+          nullable: true
+      additionalProperties: false
+      description: Represents an icon.
+    v1.Index:
+      type: object
+      properties:
+        index_id:
+          type: string
+          description: Gets or sets the index ID associated with the index.
+          nullable: true
+        name:
+          type: string
+          description: Gets or sets the name associated with the index.
+          nullable: true
+        description:
+          type: string
+          description: Gets or sets the descripion of the index.
+          nullable: true
+      additionalProperties: false
+      description: Represents an index.
+    v1.IndexData:
+      type: object
+      properties:
+        index_id:
+          type: string
+          description: Gets or sets the index ID associated with the index.
+          nullable: true
+        name:
+          type: string
+          description: Gets or sets the name associated with the index.
+          nullable: true
+        description:
+          type: string
+          description: Gets or sets the descripion of the index.
+          nullable: true
+        index_method:
+          type: string
+          description: Gets or sets the index method.
+          nullable: true
+        index_method_parameters:
+          type: object
+          additionalProperties:
+            type: string
+          description: Gets or sets the parameters of the index method.
+          nullable: true
+        period_recalculation:
+          type: string
+          description: Gets or sets the period recalculation of the index.
+          nullable: true
+        visibility_public:
+          type: boolean
+          description: Gets or sets the visibility public of the index.
+          nullable: true
+        notify_emails:
+          type: string
+          description: Gets or sets the notify emails of the index.
+          nullable: true
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/v1.IndexDataComponent'
+          description: Gets or sets the components of the index.
+          nullable: true
+      additionalProperties: false
+      description: Represents a data model for index data.
+    v1.IndexDataComponent:
+      type: object
+      properties:
+        component_id:
+          type: string
+          nullable: true
+        evaluation_method:
+          type: string
+          nullable: true
+        evaluation_method_parameters:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+      additionalProperties: false
+    v1.IndexDataResponse:
+      type: object
+      properties:
+        index_id:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+      additionalProperties: false
+    v1.IndexTimeseriesItem:
+      type: object
+      properties:
+        time_period_start:
+          type: string
+          description: The start time of the time period.
+          format: date-time
+        time_period_end:
+          type: string
+          description: The end time of the time period.
+          format: date-time
+        time_open:
+          type: string
+          description: The time when the value opened.
+          format: date-time
+          nullable: true
+        time_close:
+          type: string
+          description: The time when the value closed.
+          format: date-time
+          nullable: true
+        value_open:
+          type: number
+          description: The opening value.
+          format: double
+          nullable: true
+        value_high:
+          type: number
+          description: The highest value during the time period.
+          format: double
+          nullable: true
+        value_low:
+          type: number
+          description: The lowest value during the time period.
+          format: double
+          nullable: true
+        value_close:
+          type: number
+          description: The closing value.
+          format: double
+          nullable: true
+        value_count:
+          type: integer
+          description: The number of values during the time period.
+          format: int64
+      additionalProperties: false
+      description: Represents a timeseries item with value information.
+    v1.IndexValue:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+          format: double
+        composition:
+          type: array
+          items:
+            $ref: '#/components/schemas/v1.IndexValueComponent'
+          nullable: true
+      additionalProperties: false
+    v1.IndexValueComponent:
+      type: object
+      properties:
+        component_id:
+          type: string
+          nullable: true
+        component_value:
+          type: number
+          format: double
+      additionalProperties: false
+    v1.LastTrade:
+      type: object
+      properties:
+        time_exchange:
+          type: string
+          description: The exchange time of the last trade.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the last trade was received.
+          format: date-time
+        uuid:
+          type: string
+          description: The UUID of the last trade.
+          format: uuid
+        price:
+          type: number
+          description: The price of the last trade.
+          format: double
+        size:
+          type: number
+          description: The size of the last trade.
+          format: double
+        taker_side:
+          type: string
+          description: The taker side of the last trade.
+          nullable: true
+      additionalProperties: false
+      description: Represents the last executed transaction.
+    v1.ListingItem:
+      type: object
+      properties:
+        metric_id:
+          type: string
+          description: Gets or sets the metric ID.
+          nullable: true
+        symbol_id:
+          type: string
+          description: Gets or sets the symbol ID.
+          nullable: true
+        symbol_id_external:
+          type: string
+          description: Gets or sets the symbol ID from the exchange.
+          nullable: true
+        exchange_id:
+          type: string
+          description: Gets or sets the exchange ID.
+          nullable: true
+        asset_id:
+          type: string
+          description: Gets or sets the asset ID.
+          nullable: true
+        asset_id_external:
+          type: string
+          description: Gets or sets the asset ID from the exchange.
+          nullable: true
+        chain_id:
+          type: string
+          description: Gets or sets the chain id.
+          nullable: true
+        network_id:
+          type: string
+          description: Gets or sets the network id.
+          nullable: true
+      additionalProperties: false
+      description: Represents a listing item.
+    v1.Metric:
+      type: object
+      properties:
+        metric_id:
+          type: string
+          description: Gets or sets the metric ID.
+          nullable: true
+        description:
+          type: string
+          description: Gets or sets the metric description.
+          nullable: true
+      additionalProperties: false
+      description: Represents a metric.
+    v1.MetricData:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: Gets or sets the symbol id.
+          nullable: true
+        time:
+          type: string
+          description: Gets or sets the time at which the value is recorded.
+          format: date-time
+        value:
+          type: number
+          description: Gets or sets the value of the metric.
+          format: double
+      additionalProperties: false
+      description: Represents a data model for metric data.
+    v1.OrderBook:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The exchange time of the order book.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the order book was received.
+          format: date-time
+        asks:
+          description: The asks made by market makers.
+          nullable: true
+        bids:
+          description: The bids made by market makers.
+          nullable: true
+      additionalProperties: false
+      description: Represents an order book with additional information and functionality.
+    v1.OrderBookBase:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The exchange time of the order book.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the order book was received.
+          format: date-time
+        asks:
+          description: The asks made by market makers.
+          nullable: true
+        bids:
+          description: The bids made by market makers.
+          nullable: true
+      additionalProperties: false
+      description: Represents the base model for order book data.
+    v1.OrderBookDepth:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The exchange time of the order book.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the order book was received.
+          format: date-time
+        ask_levels:
+          type: integer
+          description: The number of ask levels in the order book.
+          format: int64
+        bid_levels:
+          type: integer
+          description: The number of bid levels in the order book.
+          format: int64
+        ask_depth:
+          type: number
+          description: The depth of the ask side of the order book.
+          format: double
+        bid_depth:
+          type: number
+          description: The depth of the bid side of the order book.
+          format: double
+      additionalProperties: false
+      description: Represents the depth of an order book.
+    v1.Quote:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The exchange time of the quote.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the quote was received.
+          format: date-time
+        ask_price:
+          type: number
+          description: The best asking price.
+          format: double
+          nullable: true
+        ask_size:
+          type: number
+          description: 'The volume resting on the best ask. If the value is equal to zero, then the size is unknown.'
+          format: double
+          nullable: true
+        bid_price:
+          type: number
+          description: The best bidding price.
+          format: double
+          nullable: true
+        bid_size:
+          type: number
+          description: 'The volume resting on the best bid. If the value is equal to zero, then the size is unknown.'
+          format: double
+          nullable: true
+      additionalProperties: false
+      description: Represents a quote data model.
+    v1.QuoteTrade:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The exchange time of the quote trade.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The CoinAPI time when the quote trade was received.
+          format: date-time
+        ask_price:
+          type: number
+          description: The best asking price.
+          format: double
+          nullable: true
+        ask_size:
+          type: number
+          description: 'The volume resting on the best ask. If the value is equal to zero, then the size is unknown.'
+          format: double
+          nullable: true
+        bid_price:
+          type: number
+          description: The best bidding price.
+          format: double
+          nullable: true
+        bid_size:
+          type: number
+          description: 'The volume resting on the best bid. If the value is equal to zero, then the size is unknown.'
+          format: double
+          nullable: true
+        last_trade:
+          $ref: '#/components/schemas/v1.LastTrade'
+      additionalProperties: false
+      description: Represents a quote trade data model.
+    v1.Symbol:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        exchange_id:
+          type: string
+          description: The exchange identifier.
+          nullable: true
+        symbol_type:
+          type: string
+          description: The symbol type.
+          nullable: true
+        asset_id_base:
+          type: string
+          description: The base asset identifier.
+          nullable: true
+        asset_id_quote:
+          type: string
+          description: The quote asset identifier.
+          nullable: true
+        asset_id_unit:
+          type: string
+          description: The unit asset identifier.
+          nullable: true
+        future_contract_unit:
+          type: number
+          description: The contract unit for futures.
+          format: double
+          nullable: true
+        future_contract_unit_asset:
+          type: string
+          description: The asset used as the unit for futures contract.
+          nullable: true
+        future_delivery_time:
+          type: string
+          description: The future delivery time for futures contract.
+          format: date-time
+          nullable: true
+        option_type_is_call:
+          type: boolean
+          description: Indicates whether the option type is a call.
+          nullable: true
+        option_strike_price:
+          type: number
+          description: The strike price for options.
+          format: double
+          nullable: true
+        option_contract_unit:
+          type: number
+          description: The contract unit for options.
+          format: double
+          nullable: true
+        option_exercise_style:
+          type: string
+          description: The exercise style for options.
+          nullable: true
+        option_expiration_time:
+          type: string
+          description: The expiration time for options.
+          format: date-time
+          nullable: true
+        contract_delivery_time:
+          type: string
+          description: The delivery time for contracts.
+          format: date-time
+          nullable: true
+        contract_unit:
+          type: number
+          description: The contract unit for contracts.
+          format: double
+          nullable: true
+        contract_unit_asset:
+          type: string
+          description: The asset used as the unit for contracts.
+          nullable: true
+        contract_id:
+          type: string
+          description: The contract identifier.
+          nullable: true
+        contract_display_name:
+          type: string
+          description: The display name of the contract.
+          nullable: true
+        contract_display_description:
+          type: string
+          description: The display description of the contract.
+          nullable: true
+        data_start:
+          type: string
+          nullable: true
+          readOnly: true
+        data_end:
+          type: string
+          nullable: true
+          readOnly: true
+        data_quote_start:
+          type: string
+          description: The start date of quote data.
+          format: date-time
+          nullable: true
+        data_quote_end:
+          type: string
+          description: The end date of quote data.
+          format: date-time
+          nullable: true
+        data_orderbook_start:
+          type: string
+          description: The start date of order book data.
+          format: date-time
+          nullable: true
+        data_orderbook_end:
+          type: string
+          description: The end date of order book data.
+          format: date-time
+          nullable: true
+        data_trade_start:
+          type: string
+          description: The start date of trade data.
+          format: date-time
+          nullable: true
+        data_trade_end:
+          type: string
+          description: The end date of trade data.
+          format: date-time
+          nullable: true
+        index_id:
+          type: string
+          description: The index identifier.
+          nullable: true
+        index_display_name:
+          type: string
+          description: The display name of the index.
+          nullable: true
+        index_display_description:
+          type: string
+          description: The display description of the index.
+          nullable: true
+        volume_1hrs:
+          type: number
+          description: The volume in the last 1 hour.
+          format: double
+          nullable: true
+        volume_1hrs_usd:
+          type: number
+          description: The volume in USD in the last 1 hour.
+          format: double
+          nullable: true
+        volume_1day:
+          type: number
+          description: The volume in the last 1 day.
+          format: double
+          nullable: true
+        volume_1day_usd:
+          type: number
+          description: The volume in USD in the last 1 day.
+          format: double
+          nullable: true
+        volume_1mth:
+          type: number
+          description: The volume in the last 1 month.
+          format: double
+          nullable: true
+        volume_1mth_usd:
+          type: number
+          description: The volume in USD in the last 1 month.
+          format: double
+          nullable: true
+        price:
+          type: number
+          description: The price.
+          format: double
+          nullable: true
+        symbol_id_exchange:
+          type: string
+          description: The symbol identifier in the exchange.
+          nullable: true
+        asset_id_base_exchange:
+          type: string
+          description: The base asset identifier in the exchange.
+          nullable: true
+        asset_id_quote_exchange:
+          type: string
+          description: The quote asset identifier in the exchange.
+          nullable: true
+        price_precision:
+          type: number
+          description: The price precision.
+          format: double
+          nullable: true
+        size_precision:
+          type: number
+          description: The size precision.
+          format: double
+          nullable: true
+        raw_kvp:
+          type: object
+          additionalProperties:
+            type: string
+          description: Not normalized raw kvp data.
+          nullable: true
+      additionalProperties: false
+      description: Represents a symbol data model.
+    v1.SymbolMapping:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol ID.
+          nullable: true
+        symbol_id_exchange:
+          type: string
+          description: The exchange-specific symbol ID.
+          nullable: true
+        asset_id_base_exchange:
+          type: string
+          description: The exchange-specific base asset ID.
+          nullable: true
+        asset_id_quote_exchange:
+          type: string
+          description: The exchange-specific quote asset ID.
+          nullable: true
+        asset_id_base:
+          type: string
+          description: The base asset ID.
+          nullable: true
+        asset_id_quote:
+          type: string
+          description: The quote asset ID.
+          nullable: true
+        price_precision:
+          type: number
+          description: The price precision.
+          format: double
+          nullable: true
+        size_precision:
+          type: number
+          description: The size precision.
+          format: double
+          nullable: true
+      additionalProperties: false
+      description: Represents symbol mapping information for exchange symbols.
+    v1.TimeseriesItem:
+      type: object
+      properties:
+        time_period_start:
+          type: string
+          description: The start time of the time period.
+          format: date-time
+        time_period_end:
+          type: string
+          description: The end time of the time period.
+          format: date-time
+        time_open:
+          type: string
+          description: The time when the price opened.
+          format: date-time
+          nullable: true
+        time_close:
+          type: string
+          description: The time when the price closed.
+          format: date-time
+          nullable: true
+        price_open:
+          type: number
+          description: The opening price.
+          format: double
+          nullable: true
+        price_high:
+          type: number
+          description: The highest price during the time period.
+          format: double
+          nullable: true
+        price_low:
+          type: number
+          description: The lowest price during the time period.
+          format: double
+          nullable: true
+        price_close:
+          type: number
+          description: The closing price.
+          format: double
+          nullable: true
+        volume_traded:
+          type: number
+          description: The total volume traded during the time period.
+          format: double
+        trades_count:
+          type: integer
+          description: The number of trades executed during the time period.
+          format: int64
+      additionalProperties: false
+      description: Represents a timeseries item with price and volume information.
+    v1.TimeseriesPeriod:
+      type: object
+      properties:
+        period_id:
+          type: string
+          description: The period ID.
+          nullable: true
+        length_seconds:
+          type: integer
+          description: The length of the period in seconds.
+          format: int32
+        length_months:
+          type: integer
+          description: The length of the period in months.
+          format: int32
+        unit_count:
+          type: integer
+          description: The unit count.
+          format: int32
+          nullable: true
+        unit_name:
+          type: string
+          description: The unit name.
+          nullable: true
+        display_name:
+          type: string
+          description: The display name of the timeseries period.
+          nullable: true
+      additionalProperties: false
+      description: Represents a timeseries period used in exchange rate data.
+    v1.Trade:
+      type: object
+      properties:
+        symbol_id:
+          type: string
+          description: The symbol identifier.
+          nullable: true
+        time_exchange:
+          type: string
+          description: The time of trade reported by the exchange.
+          format: date-time
+        time_coinapi:
+          type: string
+          description: The time when the trade was received by CoinAPI.
+          format: date-time
+        uuid:
+          type: string
+          description: The unique identifier for the trade.
+          format: uuid
+        price:
+          type: number
+          description: The price of the transaction.
+          format: double
+        size:
+          type: number
+          description: The base asset amount traded in the transaction.
+          format: double
+        taker_side:
+          type: string
+          description: The aggressor side of the transaction (BUY/SELL/BUY_ESTIMATED/SELL_ESTIMATED/UNKNOWN).
+          nullable: true
+        id_trade:
+          type: string
+          description: The trade identifier.
+          nullable: true
+        id_order_maker:
+          type: string
+          description: The order maker identifier.
+          nullable: true
+        id_order_taker:
+          type: string
+          description: The order taker identifier.
+          nullable: true
+      additionalProperties: false
+      description: Represents a trade executed on the exchange.
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      description: CoinApi API key needed to access the endpoints
+      name: X-CoinAPI-Key
+      in: header
+security:
+  - ApiKey: []
+tags:
+  - name: Exchange Rates
+    description: "\r\n<span data-status-page=\"28924\"></span>\r\nExchange rate is defined as (VWAP-24H) last 24 hour (rolling window over time) Volume Weighted Average Price across multiple data sources listed on our platform. We are selecting and managing the data sources that are used in the calculation based on multiple factors to provide data of highest quality. \r\n\r\nAlgorithm is described below:\r\n\r\n  1. Exchange rates are produced from quotes, trades, and metadata datasets.\r\n  1. Symbols that are not data_type = \"SPOT\" are excluded from the calculation.\r\n  1. Symbols from the data sources that were marked by us as not legitimate are excluded from the calculation.\r\n  1. Quotes data where the spread is outside the range of ```<0$; 67%>``` are discarded. `spreadPrc = (ask - bid) / ((ask + bid) / 2)`\r\n  1. The midpoint from the quote data is used as a pricing reference and it's weighted by the passive cumulative volume resting on the best prices.\r\n  1. Volume from the trades is used to weight the midpoint prices in the VWAP24 algorithm.\r\n  1. Midpoint data that has not been updated in the last 5 minutes and 1 second is discarded.\r\n  1. The last 24-hour volume for each symbol is updated every 4 hours when approximately 20% of the data in the sliding window changes (also, the list of eligible markets is updated at the same time).\r\n  1. Everywhere in the algorithm below, we are using asset pairs only from exchanges that have the highest legitimacy rank, and the rest of the exchanges are discarded. As we establish the highest-ranking exchanges that have this data for each asset pair, we ensure that the highest quality data is used for each of them. The rank used for asset pairing is carried over to the following steps.\r\n  1. Every 1 second, we update VWAP24 data for every asset pair across all data sources.\r\n  1. For each asset pair, we also discard data that is outside the 3 sigma range if there are at least 3 exchanges for this asset pair.\r\n  1. From the VWAP24 data, we are creating a tree structure where node/vertex = asset and edge = rate.\r\n  1. By traversing the tree structure using the BFS algorithm and our secret sauce, we are able to establish the final exchange rates.\r\n    "
+  - name: Metadata
+    description: <span data-status-page="28923"></span>
+  - name: Order Book L3
+    description: "\n<span data-status-page=\"28929\"></span>\nThis section describes calls related to order book data, also known as books or passive level 3 data."
+  - name: Order Book
+    description: "\n<span data-status-page=\"28929\"></span>\nThis section describes calls related to order book data, also known as books or passive level 2 data.\n\n:::info\nWhen requesting current data for a specific symbol, output is not encapsulated into JSON array as only one item is returned.\n:::\n\n:::info\nGET `/v1/orderbooks/current` endpoint is charged one request per 100 data points returned after applying a filter defined by filter_symbol_id parameter. If filter symbols target more than one exchange, error is returned.\n:::\n\n:::info\nWhen requesting current order book data limited to a single level, then quotes are actually used. This information is important from the perspective that quotes data could be faster than order book data (behavior is dependent solely one the data source) and they can have the size equal to 0 when the size is unknown. Some data sources publish order books and separately quote data (without the sizes) at a higher frequency. In that case, we will merge the order book feed with quotes feed to make sure that our updates are as fast as possible. The quotes will have the size equal to 0 as the value is unknown and the customer can decide if these higher frequency updates without the sizes are valuable or if not then can discard them or ask for at least 2 order book levels (in case of a REST API call). For the data sources that publish order books only or order books and quotes with the sizes then this will not happen.\n:::"
+  - name: Ohlcv
+    description: "\n<span data-status-page=\"28926\"></span>\n\nAPI calls described in this section are related to downloading OHLCV *(Open, High, Low, Close, Volume)* timeseries data.\nEach data point of this timeseries represents several indicators calculated from transactions activity inside a time range (period).\n\n:::info\nOHLCV data primary purpose is to present an overview of the market in human readable form. \nIt's often used to visualize market data on charts, websites, and various kinds of reports.\n:::\n\n:::tip\nCoinAPI expanded the standard OHLCV timeseries by including time of first and last trade and amount of trades executed inside period.\n:::\n    "
+  - name: Assets
+    description: Controller for accessing asset information.
+  - name: Indexes
+    description: 'Indexes section of the API is in the Alpha release cycle. Use only for testing, evaluaton and feedback.'
+  - name: Metrics
+    description: "<span data-status-page=\"28933\"></span>\r\nMetrics are quantitative measurements used to evaluate the performance and activity of cryptocurrency exchanges. These metrics include:\r\n\r\n1. Trading Volume: The total amount of cryptocurrency traded on an exchange within a specific time period, indicating liquidity and activity.\r\n1. Market Depth: The level of buy and sell orders at different price levels, providing insights into liquidity and potential price impact.\r\n1. Order Book: A record of outstanding buy and sell orders for a cryptocurrency, reflecting supply and demand dynamics.\r\n1. Spread: The difference between the highest bid and lowest ask prices, indicating liquidity and trading costs.\r\n1. Price Charts: Visual representations of cryptocurrency price movements over time, helping identify trends and inform trading decisions.\r\n1. Market Cap: The total value of a cryptocurrency calculated by its price multiplied by circulating supply, reflecting relative size and value.\r\n1. Trading Pairs: Combinations of cryptocurrencies available for trading, including volume, price, and spread for each pair.\r\n1. User Metrics: Data on active users, new registrations, user retention, and engagement, indicating platform popularity and growth.\r\n1. Trading Fees: Fees charged for executing trades, including fee structure, discounts, and revenue generated by the exchange.\r\n1. Security Metrics: Measures assessing the security of an exchange, such as past incidents, user fund protection, and security audits.\r\n\r\nThese metrics assist traders and investors in evaluating market activity, liquidity, and the reliability of crypto exchanges for informed decision-making."
+  - name: OrderBooks3
+    description: Controller for managing order book L3 data.
+  - name: OrderBooks
+    description: Controller for managing order book data.
+  - name: Quotes
+    description: 'Controller for retrieving quotes data, also known as quotes or passive level 1 data.'
+  - name: Symbols
+    description: Controller for retrieving symbol information.
+  - name: TimeSeries
+    description: 'Controller for retrieving OHLCV (Open, High, Low, Close, Volume) timeseries data.'
+  - name: Trades
+    description: Controller for retrieving trade data related to executed transactions.

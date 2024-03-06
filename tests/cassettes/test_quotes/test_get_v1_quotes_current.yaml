@@ -1,0 +1,34 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/quotes/current?filter_symbol_id=KRAKEN_SPOT_BTC_USD%2CCOINBASE_SPOT_BTC_USD
+    response:
+      content: "[\n  {\n    \"symbol_id\": \"COINBASE_SPOT_BTC_USD\",\n    \"time_exchange\": \"2024-03-06T20:45:09.3462640Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:09.3833258Z\",\n    \"ask_price\": 67030.27,\n    \"ask_size\": 0.01647301,\n    \"bid_price\": 67027.15,\n    \"bid_size\": 0.02,\n    \"last_trade\": {\n      \"time_exchange\": \"2024-03-06T20:45:08.8999700Z\",\n      \"time_coinapi\": \"2024-03-06T20:45:09.0041432Z\",\n      \"uuid\": \"f91b2ddf-d562-40b8-8995-be6be7c78c93\",\n      \"price\": 67030.32,\n      \"size\": 0.00014042,\n      \"taker_side\": \"BUY\"\n    }\n  },\n  {\n    \"symbol_id\": \"COINBASE_SPOT_BTC_USDT\",\n    \"time_exchange\": \"2024-03-06T20:45:09.1338390Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:09.1726563Z\",\n    \"ask_price\": 66877.68,\n    \"ask_size\": 0.01311601,\n    \"bid_price\": 66859.85,\n    \"bid_size\": 0.018,\n    \"last_trade\": {\n      \"time_exchange\": \"2024-03-06T20:45:06.5154150Z\",\n      \"time_coinapi\": \"2024-03-06T20:45:06.6055949Z\",\n      \"uuid\": \"05d0611a-b060-419a-b641-0b39a0eaa1a8\",\n      \"price\": 66865.87,\n      \"size\": 0.02971099,\n      \"taker_side\": \"SELL\"\n    }\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USDT\",\n    \"time_exchange\": \"2024-03-06T20:45:09.1544840Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:09.0996162Z\",\n    \"ask_price\": 66842.80000,\n    \"ask_size\": 0.07458000,\n    \"bid_price\": 66840.40000,\n    \"bid_size\": 0.02200000,\n    \"last_trade\": {\n      \"time_exchange\": \"2024-03-06T20:45:09.0442008Z\",\n      \"time_coinapi\": \"2024-03-06T20:45:08.9900747Z\",\n      \"uuid\": \"d1e31613-2c87-422a-a45c-383b4f4baedd\",\n      \"price\": 66840.30000,\n      \"size\": 0.00040000,\n      \"taker_side\": \"SELL\"\n    }\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USDC\",\n    \"time_exchange\": \"2024-03-06T20:45:09.5312349Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:09.4759393Z\",\n    \"ask_price\": 66983.49000,\n    \"ask_size\": 0.37322634,\n    \"bid_price\": 66977.64000,\n    \"bid_size\": 0.37325885,\n    \"last_trade\": {\n      \"time_exchange\": \"2024-03-06T20:44:55.1274690Z\",\n      \"time_coinapi\": \"2024-03-06T20:44:55.0732245Z\",\n      \"uuid\": \"270a7cad-0893-4bbc-99e7-f3a82e39d217\",\n      \"price\": 67020.34000,\n      \"size\": 0.00182200,\n      \"taker_side\": \"SELL\"\n    }\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2024-03-06T20:45:09.5531771Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:09.4920702Z\",\n    \"ask_price\": 66985.80000,\n    \"ask_size\": 2.81672169,\n    \"bid_price\": 66985.70000,\n    \"bid_size\": 1.11250000,\n    \"last_trade\": {\n      \"time_exchange\": \"2024-03-06T20:45:06.6270771Z\",\n      \"time_coinapi\": \"2024-03-06T20:45:06.7833646Z\",\n      \"uuid\": \"4aa4ffcc-b693-430e-a66e-8a89f412b611\",\n      \"price\": 67000.00000,\n      \"size\": 0.00400759,\n      \"taker_side\": \"BUY\"\n    }\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 20:45:09 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-request-cost:
+          - '1'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

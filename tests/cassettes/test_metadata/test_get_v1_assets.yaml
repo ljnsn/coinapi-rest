@@ -1,0 +1,38 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/assets?filter_asset_id=BTC%2CXMR
+    response:
+      content: "[\n  {\n    \"asset_id\": \"BTC\",\n    \"name\": \"Bitcoin\",\n    \"type_is_crypto\": 1,\n    \"data_quote_start\": \"2014-02-24T00:00:00.0000000Z\",\n    \"data_quote_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_orderbook_start\": \"2014-02-24T17:43:05.0000000Z\",\n    \"data_orderbook_end\": \"2023-07-07T00:00:00.0000000Z\",\n    \"data_trade_start\": \"2010-07-17T00:00:00.0000000Z\",\n    \"data_trade_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_symbols_count\": 209311,\n    \"volume_1hrs_usd\": 36054982340427.60,\n    \"volume_1day_usd\": 9187600161200152.19,\n    \"volume_1mth_usd\": 3341898425034399713.91,\n    \"price_usd\": 67009.375950596670472379501527,\n    \"id_icon\": \"4caf2b16-a017-4e26-a348-2cea69c34cba\",\n    \"data_start\": \"2010-07-17\",\n    \"data_end\": \"2024-03-05\"\n  },\n  {\n    \"asset_id\": \"XMR\",\n    \"name\": \"Monero\",\n    \"type_is_crypto\": 1,\n    \"data_quote_start\": \"2016-06-13T00:00:00.0000000Z\",\n    \"data_quote_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_orderbook_start\": \"2016-06-12T11:53:38.1680117Z\",\n    \"data_orderbook_end\": \"2023-07-07T00:00:00.0000000Z\",\n    \"data_trade_start\": \"2016-05-29T00:00:00.0000000Z\",\n    \"data_trade_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_symbols_count\": 793,\n    \"volume_1hrs_usd\": 3058598.18,\n    \"volume_1day_usd\": 521360499.12,\n    \"volume_1mth_usd\": 88208552798.15,\n    \"price_usd\": 143.4701315600703382420940765,\n    \"id_icon\": \"e342d99d-4648-423e-9fb5-f68785dd2adf\",\n    \"data_start\": \"2016-05-29\",\n    \"data_end\": \"2024-03-05\"\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 18:36:11 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-remaining:
+          - '65'
+        x-ratelimit-request-cost:
+          - '1'
+        x-ratelimit-used:
+          - '35'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

@@ -1,0 +1,34 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/orderbooks3/KRAKEN_SPOT_BTC_USD/current?limit_levels=10
+    response:
+      content: "{\n  \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n  \"time_exchange\": \"2024-03-06T20:14:59.6893889Z\",\n  \"time_coinapi\": \"2024-03-06T20:14:59.6327906Z\",\n  \"asks\": [\n    {\n      \"price\": 67279.20000,\n      \"size\": 7.44848028\n    },\n    {\n      \"price\": 67279.30000,\n      \"size\": 0.03306523\n    },\n    {\n      \"price\": 67279.40000,\n      \"size\": 1.48634089\n    },\n    {\n      \"price\": 67280.20000,\n      \"size\": 1.48632268\n    },\n    {\n      \"price\": 67281.00000,\n      \"size\": 1.48630566\n    },\n    {\n      \"price\": 67282.90000,\n      \"size\": 0.00100000\n    },\n    {\n      \"price\": 67284.00000,\n      \"size\": 0.49810000\n    },\n    {\n      \"price\": 67284.60000,\n      \"size\": 0.05036925\n    },\n    {\n      \"price\": 67285.40000,\n      \"size\": 2.22931136\n    },\n    {\n      \"price\": 67285.70000,\n      \"size\": 0.05951342\n    }\n  ],\n  \"bids\": [\n    {\n      \"price\": 67279.10000,\n      \"size\": 1.61591794\n    },\n    {\n      \"price\": 67275.00000,\n      \"size\": 0.05240000\n    },\n    {\n      \"price\": 67266.00000,\n      \"size\": 0.05140000\n    },\n    {\n      \"price\": 67264.70000,\n      \"size\": 0.44595673\n    },\n    {\n      \"price\": 67263.40000,\n      \"size\": 0.89186243\n    },\n    {\n      \"price\": 67260.90000,\n      \"size\": 1.48674676\n    },\n    {\n      \"price\": 67259.70000,\n      \"size\": 1.48677347\n    },\n    {\n      \"price\": 67257.50000,\n      \"size\": 1.48682116\n    },\n    {\n      \"price\": 67254.00000,\n      \"size\": 1.48689994\n    },\n    {\n      \"price\": 67251.90000,\n      \"size\": 0.37500000\n    }\n  ]\n}"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 20:14:59 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-request-cost:
+          - '1'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

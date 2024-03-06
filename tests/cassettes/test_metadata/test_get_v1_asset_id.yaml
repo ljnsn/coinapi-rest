@@ -1,0 +1,38 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/assets/BTC
+    response:
+      content: "[\n  {\n    \"asset_id\": \"BTC\",\n    \"name\": \"Bitcoin\",\n    \"type_is_crypto\": 1,\n    \"data_quote_start\": \"2014-02-24T00:00:00.0000000Z\",\n    \"data_quote_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_orderbook_start\": \"2014-02-24T17:43:05.0000000Z\",\n    \"data_orderbook_end\": \"2023-07-07T00:00:00.0000000Z\",\n    \"data_trade_start\": \"2010-07-17T00:00:00.0000000Z\",\n    \"data_trade_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_symbols_count\": 209311,\n    \"volume_1hrs_usd\": 15173004825934.21,\n    \"volume_1day_usd\": 8673472002265599.11,\n    \"volume_1mth_usd\": 3305222387793239537.33,\n    \"price_usd\": 66896.625673088884672386634461,\n    \"id_icon\": \"4caf2b16-a017-4e26-a348-2cea69c34cba\",\n    \"data_start\": \"2010-07-17\",\n    \"data_end\": \"2024-03-05\"\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 18:36:12 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-remaining:
+          - '65'
+        x-ratelimit-request-cost:
+          - '1'
+        x-ratelimit-used:
+          - '35'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

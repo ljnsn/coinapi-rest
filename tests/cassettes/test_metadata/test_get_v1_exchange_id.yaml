@@ -1,0 +1,38 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/exchanges/KRAKEN
+    response:
+      content: "[\n  {\n    \"exchange_id\": \"KRAKEN\",\n    \"website\": \"https://www.kraken.com/\",\n    \"name\": \"Kraken\",\n    \"data_quote_start\": \"2014-07-31T00:00:00.0000000Z\",\n    \"data_quote_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_orderbook_start\": \"2014-07-31T13:05:46.0000000Z\",\n    \"data_orderbook_end\": \"2023-07-06T00:00:00.0000000Z\",\n    \"data_trade_start\": \"2013-10-22T00:00:00.0000000Z\",\n    \"data_trade_end\": \"2024-03-05T00:00:00.0000000Z\",\n    \"data_symbols_count\": 874,\n    \"volume_1hrs_usd\": 8335263.96,\n    \"volume_1day_usd\": 901866683.99,\n    \"volume_1mth_usd\": 40030073305.96\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 18:36:15 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-remaining:
+          - '65'
+        x-ratelimit-request-cost:
+          - '1'
+        x-ratelimit-used:
+          - '35'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

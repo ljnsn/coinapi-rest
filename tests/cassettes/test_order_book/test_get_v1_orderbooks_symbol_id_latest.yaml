@@ -1,0 +1,38 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/orderbooks/KRAKEN_SPOT_BTC_USD/latest?limit=2&limit_levels=10
+    response:
+      content: "[\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2024-03-05T00:00:00.0149769Z\",\n    \"time_coinapi\": \"2024-03-05T00:00:00.2161284Z\",\n    \"asks\": [\n      {\n        \"price\": 64338.9,\n        \"size\": 0.01678611\n      },\n      {\n        \"price\": 64401,\n        \"size\": 0.00041002\n      },\n      {\n        \"price\": 64499,\n        \"size\": 10.17906682\n      },\n      {\n        \"price\": 64513.4,\n        \"size\": 11.19287954\n      },\n      {\n        \"price\": 64542.5,\n        \"size\": 0.00401233\n      },\n      {\n        \"price\": 64555.1,\n        \"size\": 0.2\n      },\n      {\n        \"price\": 64575.3,\n        \"size\": 0.02431066\n      },\n      {\n        \"price\": 64613.2,\n        \"size\": 0.42810768\n      },\n      {\n        \"price\": 68340.7,\n        \"size\": 1.46425688\n      },\n      {\n        \"price\": 68341.5,\n        \"size\": 1.46324132\n      }\n    ],\n    \"bids\": [\n      {\n        \"price\": 68340.6,\n        \"size\": 0.04\n      },\n      {\n        \"price\": 68336.5,\n        \"size\": 1.46334487\n      },\n      {\n        \"price\": 68335.8,\n        \"size\": 1.46336127\n      },\n      {\n        \"price\": 68334.8,\n        \"size\": 0.375\n      },\n      {\n        \"price\": 68331.8,\n        \"size\": 1.46344727\n      },\n      {\n        \"price\": 68328.7,\n        \"size\": 0.10292988\n      },\n      {\n        \"price\": 68328.6,\n        \"size\": 1.46351575\n      },\n      {\n        \"price\": 68326.5,\n        \"size\": 0.1\n      },\n      {\n        \"price\": 68323.1,\n        \"size\": 0.03976206\n      },\n      {\n        \"price\": 68323,\n        \"size\": 0.38444726\n      }\n    ]\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2024-03-05T00:00:00.4762508Z\",\n    \"time_coinapi\": \"2024-03-05T00:00:01.0116028Z\",\n    \"asks\": [\n      {\n        \"price\": 64338.9,\n        \"size\": 0.01678611\n      },\n      {\n        \"price\": 64401,\n        \"size\": 0.00041002\n      },\n      {\n        \"price\": 64499,\n        \"size\": 10.17906682\n      },\n      {\n        \"price\": 64513.4,\n        \"size\": 11.19287954\n      },\n      {\n        \"price\": 64542.5,\n        \"size\": 0.00401233\n      },\n      {\n        \"price\": 64555.1,\n        \"size\": 0.2\n      },\n      {\n        \"price\": 64575.3,\n        \"size\": 0.02431066\n      },\n      {\n        \"price\": 64613.2,\n        \"size\": 0.42810768\n      },\n      {\n        \"price\": 68340.7,\n        \"size\": 0.001\n      },\n      {\n        \"price\": 68341.5,\n        \"size\": 1.46324132\n      }\n    ],\n    \"bids\": [\n      {\n        \"price\": 68340.6,\n        \"size\": 0.04\n      },\n      {\n        \"price\": 68338.3,\n        \"size\": 1.46330719\n      },\n      {\n        \"price\": 68336.5,\n        \"size\": 1.46334487\n      },\n      {\n        \"price\": 68335.8,\n        \"size\": 1.46336127\n      },\n      {\n        \"price\": 68334.8,\n        \"size\": 0.375\n      },\n      {\n        \"price\": 68328.7,\n        \"size\": 0.10292988\n      },\n      {\n        \"price\": 68328.6,\n        \"size\": 1.46351575\n      },\n      {\n        \"price\": 68326.5,\n        \"size\": 0.1\n      },\n      {\n        \"price\": 68323.1,\n        \"size\": 0.03976206\n      },\n      {\n        \"price\": 68323,\n        \"size\": 0.38444726\n      }\n    ]\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 21:18:01 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-remaining:
+          - '33'
+        x-ratelimit-request-cost:
+          - '1'
+        x-ratelimit-used:
+          - '67'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

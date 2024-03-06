@@ -1,0 +1,24 @@
+interactions:
+  - request:
+      body:
+      headers:
+        Accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/indexes/TEST_IDX14_VWAP/timeseries
+    response:
+      body:
+        string: ''
+      headers:
+        content-length:
+          - '0'
+        date:
+          - Tue, 05 Mar 2024 00:10:29 GMT
+      status:
+        code: 500
+        message: Internal Server Error
+version: 1

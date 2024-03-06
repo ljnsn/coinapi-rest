@@ -1,0 +1,38 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/trades/KRAKEN_SPOT_BTC_USD/history?include_id=false&limit=10&time_end=2022-01-02T00%3A00%3A00&time_start=2022-01-01T00%3A00%3A00
+    response:
+      content: "[\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:01.1510000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:01.2639890Z\",\n    \"uuid\": \"d00a4a46-e9f7-42d2-88a2-9d81d0282f72\",\n    \"price\": 46150,\n    \"size\": 0.05,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:01.7690000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:01.8841836Z\",\n    \"uuid\": \"7594bab3-791f-4da1-9133-c10da7204aca\",\n    \"price\": 46150,\n    \"size\": 0.00268,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:01.8960000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:02.0093917Z\",\n    \"uuid\": \"b46ee35a-9f3b-4383-8f32-ac8143ce817f\",\n    \"price\": 46150,\n    \"size\": 0.00500541,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:02.9140000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:03.0371757Z\",\n    \"uuid\": \"2f5c2a21-8604-4305-af33-df20457b4de0\",\n    \"price\": 46150,\n    \"size\": 0.00376624,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:03.9650000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:04.0786239Z\",\n    \"uuid\": \"d6994030-362e-4bf2-8ac5-d3fcee5def7f\",\n    \"price\": 46150,\n    \"size\": 0.00174919,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:06.6420000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:06.7552807Z\",\n    \"uuid\": \"a82b1f62-dbc8-49da-b379-6e40b2c0461f\",\n    \"price\": 46150,\n    \"size\": 0.00015127,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:08.2410000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:08.3568717Z\",\n    \"uuid\": \"da48580a-cf29-4760-a720-c6cb9c611010\",\n    \"price\": 46150,\n    \"size\": 0.064,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:08.2440000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:08.3597135Z\",\n    \"uuid\": \"733483c5-3b71-4fe5-861a-2d654bfa6e3f\",\n    \"price\": 46150,\n    \"size\": 0.062,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:08.2670000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:08.3812606Z\",\n    \"uuid\": \"9194397b-4d37-4e10-adf4-bde24691c995\",\n    \"price\": 46150,\n    \"size\": 0.09306775,\n    \"taker_side\": \"BUY\"\n  },\n  {\n    \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n    \"time_exchange\": \"2022-01-01T00:00:08.2790000Z\",\n    \"time_coinapi\": \"2022-01-01T00:00:08.3982499Z\",\n    \"uuid\": \"2e8aaf08-1176-479f-859f-8e32e9fdba50\",\n    \"price\": 46150,\n    \"size\": 0.04367,\n    \"taker_side\": \"BUY\"\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 20:46:23 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-remaining:
+          - '43'
+        x-ratelimit-request-cost:
+          - '1'
+        x-ratelimit-used:
+          - '57'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

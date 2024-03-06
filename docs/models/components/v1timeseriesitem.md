@@ -1,0 +1,19 @@
+# V1TimeseriesItem
+
+Represents a timeseries item with price and volume information.
+
+
+## Fields
+
+| Field                                                                | Type                                                                 | Required                                                             | Description                                                          |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `time_period_start`                                                  | [date](https://docs.python.org/3/library/datetime.html#date-objects) | :heavy_minus_sign:                                                   | The start time of the time period.                                   |
+| `time_period_end`                                                    | [date](https://docs.python.org/3/library/datetime.html#date-objects) | :heavy_minus_sign:                                                   | The end time of the time period.                                     |
+| `time_open`                                                          | [date](https://docs.python.org/3/library/datetime.html#date-objects) | :heavy_minus_sign:                                                   | The time when the price opened.                                      |
+| `time_close`                                                         | [date](https://docs.python.org/3/library/datetime.html#date-objects) | :heavy_minus_sign:                                                   | The time when the price closed.                                      |
+| `price_open`                                                         | *Optional[float]*                                                    | :heavy_minus_sign:                                                   | The opening price.                                                   |
+| `price_high`                                                         | *Optional[float]*                                                    | :heavy_minus_sign:                                                   | The highest price during the time period.                            |
+| `price_low`                                                          | *Optional[float]*                                                    | :heavy_minus_sign:                                                   | The lowest price during the time period.                             |
+| `price_close`                                                        | *Optional[float]*                                                    | :heavy_minus_sign:                                                   | The closing price.                                                   |
+| `volume_traded`                                                      | *Optional[float]*                                                    | :heavy_minus_sign:                                                   | The total volume traded during the time period.                      |
+| `trades_count`                                                       | *Optional[int]*                                                      | :heavy_minus_sign:                                                   | The number of trades executed during the time period.                |

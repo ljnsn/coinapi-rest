@@ -1,0 +1,34 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/ohlcv/KRAKEN_SPOT_BTC_USD/history?include_empty_items=false&limit=100&period_id=1DAY&time_end=2021-01-05T00%3A00%3A00&time_start=2021-01-01T00%3A00%3A00
+    response:
+      content: "[\n  {\n    \"time_period_start\": \"2021-01-01T00:00:00.0000000Z\",\n    \"time_period_end\": \"2021-01-02T00:00:00.0000000Z\",\n    \"time_open\": \"2021-01-01T00:00:02.4460000Z\",\n    \"time_close\": \"2021-01-01T23:59:59.0830000Z\",\n    \"price_open\": 28959.4,\n    \"price_high\": 29670,\n    \"price_low\": 28672.3,\n    \"price_close\": 29398.9,\n    \"volume_traded\": 5856.86897657,\n    \"trades_count\": 33361\n  },\n  {\n    \"time_period_start\": \"2021-01-02T00:00:00.0000000Z\",\n    \"time_period_end\": \"2021-01-03T00:00:00.0000000Z\",\n    \"time_open\": \"2021-01-02T00:00:02.4650000Z\",\n    \"time_close\": \"2021-01-02T23:59:46.1970000Z\",\n    \"price_open\": 29398.7,\n    \"price_high\": 33245,\n    \"price_low\": 29028.7,\n    \"price_close\": 32238.8,\n    \"volume_traded\": 19615.91350889,\n    \"trades_count\": 102966\n  },\n  {\n    \"time_period_start\": \"2021-01-03T00:00:00.0000000Z\",\n    \"time_period_end\": \"2021-01-04T00:00:00.0000000Z\",\n    \"time_open\": \"2021-01-03T00:00:01.8850000Z\",\n    \"time_close\": \"2021-01-03T23:59:59.4250000Z\",\n    \"price_open\": 32215.4,\n    \"price_high\": 34771,\n    \"price_low\": 32002,\n    \"price_close\": 33082.7,\n    \"volume_traded\": 12135.92577129,\n    \"trades_count\": 93109\n  },\n  {\n    \"time_period_start\": \"2021-01-04T00:00:00.0000000Z\",\n    \"time_period_end\": \"2021-01-05T00:00:00.0000000Z\",\n    \"time_open\": \"2021-01-04T00:00:01.5010000Z\",\n    \"time_close\": \"2021-01-04T23:59:59.0330000Z\",\n    \"price_open\": 33082.7,\n    \"price_high\": 33652.3,\n    \"price_low\": 27920,\n    \"price_close\": 32048,\n    \"volume_traded\": 16125.62840498,\n    \"trades_count\": 117204\n  }\n]"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 18:41:19 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-request-cost:
+          - '1'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1

@@ -1,0 +1,10 @@
+# GetSpecificRateRequest
+
+
+## Fields
+
+| Field                                                                                               | Type                                                                                                | Required                                                                                            | Description                                                                                         |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `asset_id_base`                                                                                     | *str*                                                                                               | :heavy_check_mark:                                                                                  | Requested exchange rate base asset identifier (from the Metadata -> Assets)                         |
+| `asset_id_quote`                                                                                    | *str*                                                                                               | :heavy_check_mark:                                                                                  | Requested exchange rate quote asset identifier (from the Metadata -> Assets)                        |
+| `time`                                                                                              | *Optional[str]*                                                                                     | :heavy_minus_sign:                                                                                  | Time at which exchange rate is calculated (optional, if not supplied then current rate is returned) |

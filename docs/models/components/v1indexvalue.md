@@ -1,0 +1,10 @@
+# V1IndexValue
+
+
+## Fields
+
+| Field                                                                                      | Type                                                                                       | Required                                                                                   | Description                                                                                |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `timestamp`                                                                                | [date](https://docs.python.org/3/library/datetime.html#date-objects)                       | :heavy_minus_sign:                                                                         | N/A                                                                                        |
+| `value`                                                                                    | *Optional[float]*                                                                          | :heavy_minus_sign:                                                                         | N/A                                                                                        |
+| `composition`                                                                              | List[[components.V1IndexValueComponent](../../models/components/v1indexvaluecomponent.md)] | :heavy_minus_sign:                                                                         | N/A                                                                                        |

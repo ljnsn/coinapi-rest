@@ -1,0 +1,36 @@
+interactions:
+  - request:
+      body:
+      headers:
+        Accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/metrics/symbol/listing?exchange_id=BINANCE
+    response:
+      body:
+        string: '[]'
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Tue, 05 Mar 2024 00:29:42 GMT
+        transfer-encoding:
+          - chunked
+        vary:
+          - Accept-Encoding
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-request-cost:
+          - '0'
+      status:
+        code: 200
+        message: OK
+version: 1

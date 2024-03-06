@@ -1,0 +1,34 @@
+interactions:
+  - request:
+      body: ''
+      headers:
+        X-CoinAPI-Key:
+          - OBFUSCATED
+        accept:
+          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+        host:
+          - rest.coinapi.io
+        user-agent:
+          - coinapi-sdk/python 0.1.0 v1 CoinAPI
+      method: GET
+      uri: https://rest.coinapi.io/v1/quotes/KRAKEN_SPOT_BTC_USD/current
+    response:
+      content: "{\n  \"symbol_id\": \"KRAKEN_SPOT_BTC_USD\",\n  \"time_exchange\": \"2024-03-06T20:45:12.6114549Z\",\n  \"time_coinapi\": \"2024-03-06T20:45:12.6359035Z\",\n  \"ask_price\": 66985.80000,\n  \"ask_size\": 0.01050000,\n  \"bid_price\": 66985.70000,\n  \"bid_size\": 5.23183330,\n  \"last_trade\": {\n    \"time_exchange\": \"2024-03-06T20:45:11.4541149Z\",\n    \"time_coinapi\": \"2024-03-06T20:45:11.3954950Z\",\n    \"uuid\": \"11531dc4-6818-449a-8caf-ca6d20e45a2e\",\n    \"price\": 66985.80000,\n    \"size\": 0.20000000,\n    \"taker_side\": \"BUY\"\n  }\n}"
+      headers:
+        content-type:
+          - application/json; charset=utf-8
+        date:
+          - Wed, 06 Mar 2024 20:45:12 GMT
+        transfer-encoding:
+          - chunked
+        x-concurrencylimit-limit:
+          - '1'
+        x-concurrencylimit-remaining:
+          - '1'
+        x-ratelimit-limit:
+          - '100'
+        x-ratelimit-request-cost:
+          - '1'
+      http_version: HTTP/1.1
+      status_code: 200
+version: 1
