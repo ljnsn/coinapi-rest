@@ -48,9 +48,7 @@ from coinapi.models.operations.get_v1_trades_latest import *
 from coinapi.models.operations.get_v1_trades_symbol_id_history import *
 from coinapi.models.operations.get_v1_trades_symbol_id_latest import *
 from coinapi.models.operations.post_v1_indexes_json import *
-from coinapi.models.operations.post_v1_indexes_raw import *
 from coinapi.models.operations.put_v1_indexes_index_id_json import *
-from coinapi.models.operations.put_v1_indexes_index_id_raw import *
 
 __all__ = [
     "GetSpecificRateRequest",
@@ -143,9 +141,6 @@ __all__ = [
     "GetV1TradesSymbolIDLatestRequest",
     "GetV1TradesSymbolIDLatestResponse",
     "PostV1IndexesJSONResponse",
-    "PostV1IndexesRawResponse",
     "PutV1IndexesIndexIDJSONRequest",
     "PutV1IndexesIndexIDJSONResponse",
-    "PutV1IndexesIndexIDRawRequest",
-    "PutV1IndexesIndexIDRawResponse",
 ]
