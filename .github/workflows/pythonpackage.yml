@@ -62,7 +62,6 @@ jobs:
       - name: Test
         run: python -m pdm run test
       - name: Archive code coverage results
-        if: ${{ matrix.platform }} == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
           name: coverage-${{ matrix.package }}-${{ matrix.python-version }}
@@ -79,7 +78,7 @@ jobs:
         uses: actions/download-artifact@v3
       - name: Combine reports
         run: |
-          coverage combine $(ls **/.coverage)
+          coverage combine $(ls ./**/.coverage)
           coverage report
           coverage xml
       - name: Upload coverage
