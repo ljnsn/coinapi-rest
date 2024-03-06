@@ -37,7 +37,7 @@ def _session_start() -> None:
 def api_key() -> str:
     """Load the API key from the environment."""
     load_dotenv()
-    return os.environ["COINAPI_KEY"]
+    return os.environ.get("COINAPI_KEY", "testing")
 
 
 @pytest.fixture()

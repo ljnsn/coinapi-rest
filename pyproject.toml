@@ -45,6 +45,9 @@ command_line = "--module pytest"
 data_file = "reports/.coverage"
 source = ["src"]
 
+[tool.coverage.paths]
+source = ["src/", "/home/runner/**/src", "D:\\**\\src"]
+
 [tool.coverage.report]
 fail_under = 50
 precision = 1
@@ -170,7 +173,6 @@ convention = "google"
 ban-relative-imports = "all"
 
 [tool.ruff.lint.pep8-naming]
-# Allow Pydantic's `@validator` decorator to trigger class method treatment.
 classmethod-decorators = ["classmethod"]
 
 [tool.pytest.ini_options]
@@ -207,7 +209,7 @@ dev = [
 
 [tool.pdm.scripts]
 lint = "pre-commit run --all-files --color always"
-test = "coverage run -m pytest"
+test = "coverage run -m pytest -m 'not network'"
+test-network = "coverage run -m pytest -m network"
 # this will run after the `test` command
 post_test = { composite = ["coverage report", "coverage xml"] }
-
