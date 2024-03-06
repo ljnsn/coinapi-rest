@@ -98,7 +98,7 @@ class Base:
             raise exc from e  # type: ignore[misc]
 
         if utils.match_status_codes(["4XX", "5XX"], http_res.status_code):
-            http_res, exc = self.sdk_configuration.get_hooks().after_error(
+            http_res, exc = self.sdk_configuration.get_hooks().after_error(  # type: ignore[assignment]
                 hook_ctx,  # type: ignore[arg-type]
                 http_res,
                 None,

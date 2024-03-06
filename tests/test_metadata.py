@@ -1,7 +1,7 @@
 """Tests for metadata requests."""
 
 import pytest
-from syrupy import SnapshotAssertion
+from syrupy.assertion import SnapshotAssertion
 
 from coinapi import CoinAPI
 

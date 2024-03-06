@@ -14,6 +14,6 @@ class V1IndexValue(msgspec.Struct, kw_only=True, frozen=True, omit_defaults=True
 
     timestamp: dt.datetime = msgspec.field()
     value: float = msgspec.field()
-    composition: list[V1IndexValueComponent] | None = msgspec.field(
+    composition: list[V1IndexValueComponent] | None | msgspec.UnsetType = msgspec.field(
         default=msgspec.UNSET,
     )

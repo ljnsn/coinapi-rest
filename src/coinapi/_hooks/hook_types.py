@@ -42,8 +42,8 @@ class SDKInitHook(metaclass=abc.ABCMeta):
     def sdk_init(
         self,
         base_url: str,
-        client: httpx.Client,
-    ) -> tuple[str, httpx.Client]:
+        client: httpx.Client | None,
+    ) -> tuple[str, httpx.Client | None]:
         pass
 
 
