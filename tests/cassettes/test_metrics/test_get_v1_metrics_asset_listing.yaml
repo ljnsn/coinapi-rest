@@ -1,40 +1,38 @@
 interactions:
-  - request:
-      body:
-      headers:
-        Accept:
-          - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
-        X-CoinAPI-Key:
-          - OBFUSCATED
-        user-agent:
-          - coinapi-sdk/python 0.1.0 v1 CoinAPI
-      method: GET
-      uri: https://rest.coinapi.io/v1/metrics/asset/listing?exchange_id=BINANCE
-    response:
-      body:
-        string: '[]'
-      headers:
-        content-type:
-          - application/json; charset=utf-8
-        date:
-          - Tue, 05 Mar 2024 00:33:23 GMT
-        transfer-encoding:
-          - chunked
-        vary:
-          - Accept-Encoding
-        x-concurrencylimit-limit:
-          - '1'
-        x-concurrencylimit-remaining:
-          - '1'
-        x-ratelimit-limit:
-          - '100'
-        x-ratelimit-remaining:
-          - '80'
-        x-ratelimit-request-cost:
-          - '0'
-        x-ratelimit-used:
-          - '20'
-      status:
-        code: 200
-        message: OK
+- request:
+    body: ''
+    headers:
+      X-CoinAPI-Key:
+      - OBFUSCATED
+      accept:
+      - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+      host:
+      - rest.coinapi.io
+      user-agent:
+      - coinapi-rest/python 0.0.1 CoinAPI v1
+    method: GET
+    uri: https://rest.coinapi.io/v1/metrics/asset/listing?exchange_id=BINANCE
+  response:
+    content: '[]'
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 06 Mar 2024 22:24:01 GMT
+      transfer-encoding:
+      - chunked
+      x-concurrencylimit-limit:
+      - '1'
+      x-concurrencylimit-remaining:
+      - '1'
+      x-ratelimit-limit:
+      - '100'
+      x-ratelimit-remaining:
+      - '58'
+      x-ratelimit-request-cost:
+      - '0'
+      x-ratelimit-used:
+      - '42'
+    http_version: HTTP/1.1
+    status_code: 200
 version: 1

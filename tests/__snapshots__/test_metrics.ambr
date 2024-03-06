@@ -187,6 +187,10 @@
     V1Metric(metric_id='SUPPLY_TOTAL', description=UNSET),
   ])
 # ---
+# name: test_get_v1_metrics_asset_listing
+  list([
+  ])
+# ---
 # name: test_get_v1_metrics_exchange
   list([
   ])
