@@ -191,3 +191,7 @@
   list([
   ])
 # ---
+# name: test_get_v1_metrics_symbol_listing
+  list([
+  ])
+# ---
