@@ -17,10 +17,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install poetry>=1.2.0
-          poetry install
+          python -m pip install pdm>=2.11.1
       - name: Publish
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.POETRY_PYPI_TOKEN_PYPI }}
         run: |
-          ./scripts/publish.sh
+          python -m pdm publish
