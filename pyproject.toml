@@ -170,7 +170,6 @@ convention = "google"
 ban-relative-imports = "all"
 
 [tool.ruff.lint.pep8-naming]
-# Allow Pydantic's `@validator` decorator to trigger class method treatment.
 classmethod-decorators = ["classmethod"]
 
 [tool.pytest.ini_options]
