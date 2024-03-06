@@ -6,7 +6,7 @@ import httpx
 
 from coinapi import utils
 from coinapi._hooks import SDKHooks
-from coinapi.config import SDKConfiguration
+from coinapi.config import CoinAPIConfig
 from coinapi.exchange_rates import ExchangeRates
 from coinapi.indexes import Indexes
 from coinapi.metadata import Metadata
@@ -305,7 +305,7 @@ class CoinAPI:
     trades: Trades
     r"""Controller for retrieving trade data related to executed transactions."""
 
-    sdk_configuration: SDKConfiguration
+    sdk_configuration: CoinAPIConfig
 
     def __init__(  # noqa: PLR0913
         self,
@@ -338,7 +338,7 @@ class CoinAPI:
         if server_url is not None and url_params is not None:
             server_url = utils.template_url(server_url, url_params)
 
-        self.sdk_configuration = SDKConfiguration(
+        self.sdk_configuration = CoinAPIConfig(
             client,
             security,
             server_url,

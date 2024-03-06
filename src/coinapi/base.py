@@ -9,7 +9,7 @@ from httpx import codes
 
 from coinapi import utils
 from coinapi._hooks import HookContext
-from coinapi.config import SDKConfiguration
+from coinapi.config import CoinAPIConfig
 from coinapi.models import errors
 from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
 
@@ -31,7 +31,7 @@ ResponseT = TypeVar("ResponseT", bound=CoinAPIResponse)
 class Base:
     """Base class for operation collections."""
 
-    def __init__(self, sdk_config: SDKConfiguration) -> None:
+    def __init__(self, sdk_config: CoinAPIConfig) -> None:
         self.sdk_configuration = sdk_config
 
     def _make_request(  # noqa: PLR0912, C901

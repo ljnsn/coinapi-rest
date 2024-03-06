@@ -12,20 +12,19 @@ from coinapi.utils import utils
 SERVERS = [
     "https://rest.coinapi.io",
 ]
-"""Contains the list of servers available to the SDK"""
+"""Contains the list of available CoinAPI servers"""
 
 
-class SDKConfiguration(msgspec.Struct):
+class CoinAPIConfig(msgspec.Struct):
     """The configuration for the SDK."""
 
     client: httpx.Client | None
     security: components.Security | Callable[[], components.Security] | None = None
     server_url: str | None = ""
     server_idx: int | None = 0
-    language: str = "python"
     openapi_doc_version: str = "v1"
-    sdk_version: str = "0.1.0"
-    user_agent: str = "coinapi-sdk/python 0.1.0 v1 CoinAPI"
+    sdk_version: str = "0.0.1"
+    user_agent: str = "coinapi-rest/python 0.0.1 CoinAPI v1"
     _hooks: SDKHooks | None = None
 
     def get_server_details(self) -> tuple[str, dict[str, str]]:
