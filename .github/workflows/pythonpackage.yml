@@ -61,30 +61,28 @@ jobs:
         run: python -m pdm install -dG test
       - name: Test
         run: python -m pdm run test
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
           name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}
           path: reports/.coverage
 
-  upload-coverage:
-    runs-on: ubuntu-latest
+  coveralls-finish:
     needs: [python-test]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install tools
-        run: python -m pip install coverage requests tomli
-      - name: Download coverage reports
-        uses: actions/download-artifact@v3
-      - name: Combine reports
-        run: |
-          coverage combine $(ls ./**/.coverage)
-          coverage report
-          coverage xml
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@v2.2.3
         with:
-          files: reports/coverage.xml
+          parallel-finished: true
+          carryforward: "run-ubuntu-latest-3.10,run-ubuntu-latest-3.11,run-ubuntu-latest-3.12,run-windows-latest-3.10,run-windows-latest-3.11,run-windows-latest-3.12"
+
 
   bump-version:
     runs-on: ubuntu-latest
