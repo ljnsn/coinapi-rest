@@ -16,6 +16,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - uses: pdm-project/setup-pdm@v4
       - name: Publish package distributions to PyPI
         run: pdm publish
