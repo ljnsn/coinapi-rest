@@ -1,3 +1,26 @@
+## v0.0.3 (2024-03-07)
+
+### 🐛🚑️ Fixes
+
+- add classifiers (#10)
+
+### build
+
+- **deps**: bump actions/upload-artifact from 3 to 4 (#4)
+- **deps**: bump codecov/codecov-action from 3 to 4 (#2)
+- **deps**: bump actions/setup-python from 4 to 5 (#5)
+
+### 💚👷 CI & Build
+
+- switch to coveralls (#9)
+- use trusted publisher (#8)
+- change dependabot commit message for action bumps (#7)
+- fix pythonpublish workflow (#6)
+
+### 📝💡 Documentation
+
+- add shields (#11)
+
 ## v0.0.2 (2024-03-06)
 
 ### 🐛🚑️ Fixes
