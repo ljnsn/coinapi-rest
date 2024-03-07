@@ -1,0 +1,114 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      X-CoinAPI-Key:
+      - OBFUSCATED
+      accept:
+      - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+      host:
+      - rest.coinapi.io
+      user-agent:
+      - coinapi-rest/python 0.0.1 CoinAPI v1
+    method: GET
+    uri: https://rest.coinapi.io/v1/exchangerate/history/periods
+  response:
+    content: "[\n  {\n    \"period_id\": \"1SEC\",\n    \"length_seconds\": 1,\n    \"length_months\":
+      0,\n    \"unit_count\": 1,\n    \"unit_name\": \"second\",\n    \"display_name\":
+      \"1 Second\"\n  },\n  {\n    \"period_id\": \"2SEC\",\n    \"length_seconds\":
+      2,\n    \"length_months\": 0,\n    \"unit_count\": 2,\n    \"unit_name\": \"second\",\n
+      \   \"display_name\": \"2 Seconds\"\n  },\n  {\n    \"period_id\": \"3SEC\",\n
+      \   \"length_seconds\": 3,\n    \"length_months\": 0,\n    \"unit_count\": 3,\n
+      \   \"unit_name\": \"second\",\n    \"display_name\": \"3 Seconds\"\n  },\n
+      \ {\n    \"period_id\": \"4SEC\",\n    \"length_seconds\": 4,\n    \"length_months\":
+      0,\n    \"unit_count\": 4,\n    \"unit_name\": \"second\",\n    \"display_name\":
+      \"4 Seconds\"\n  },\n  {\n    \"period_id\": \"5SEC\",\n    \"length_seconds\":
+      5,\n    \"length_months\": 0,\n    \"unit_count\": 5,\n    \"unit_name\": \"second\",\n
+      \   \"display_name\": \"5 Seconds\"\n  },\n  {\n    \"period_id\": \"6SEC\",\n
+      \   \"length_seconds\": 6,\n    \"length_months\": 0,\n    \"unit_count\": 6,\n
+      \   \"unit_name\": \"second\",\n    \"display_name\": \"6 Seconds\"\n  },\n
+      \ {\n    \"period_id\": \"10SEC\",\n    \"length_seconds\": 10,\n    \"length_months\":
+      0,\n    \"unit_count\": 10,\n    \"unit_name\": \"second\",\n    \"display_name\":
+      \"10 Seconds\"\n  },\n  {\n    \"period_id\": \"15SEC\",\n    \"length_seconds\":
+      15,\n    \"length_months\": 0,\n    \"unit_count\": 15,\n    \"unit_name\":
+      \"second\",\n    \"display_name\": \"15 Seconds\"\n  },\n  {\n    \"period_id\":
+      \"20SEC\",\n    \"length_seconds\": 20,\n    \"length_months\": 0,\n    \"unit_count\":
+      20,\n    \"unit_name\": \"second\",\n    \"display_name\": \"20 Seconds\"\n
+      \ },\n  {\n    \"period_id\": \"30SEC\",\n    \"length_seconds\": 30,\n    \"length_months\":
+      0,\n    \"unit_count\": 30,\n    \"unit_name\": \"second\",\n    \"display_name\":
+      \"30 Seconds\"\n  },\n  {\n    \"period_id\": \"1MIN\",\n    \"length_seconds\":
+      60,\n    \"length_months\": 0,\n    \"unit_count\": 1,\n    \"unit_name\": \"minute\",\n
+      \   \"display_name\": \"1 Minute\"\n  },\n  {\n    \"period_id\": \"2MIN\",\n
+      \   \"length_seconds\": 120,\n    \"length_months\": 0,\n    \"unit_count\":
+      2,\n    \"unit_name\": \"minute\",\n    \"display_name\": \"2 Minutes\"\n  },\n
+      \ {\n    \"period_id\": \"3MIN\",\n    \"length_seconds\": 180,\n    \"length_months\":
+      0,\n    \"unit_count\": 3,\n    \"unit_name\": \"minute\",\n    \"display_name\":
+      \"3 Minutes\"\n  },\n  {\n    \"period_id\": \"4MIN\",\n    \"length_seconds\":
+      240,\n    \"length_months\": 0,\n    \"unit_count\": 4,\n    \"unit_name\":
+      \"minute\",\n    \"display_name\": \"4 Minutes\"\n  },\n  {\n    \"period_id\":
+      \"5MIN\",\n    \"length_seconds\": 300,\n    \"length_months\": 0,\n    \"unit_count\":
+      5,\n    \"unit_name\": \"minute\",\n    \"display_name\": \"5 Minutes\"\n  },\n
+      \ {\n    \"period_id\": \"6MIN\",\n    \"length_seconds\": 360,\n    \"length_months\":
+      0,\n    \"unit_count\": 6,\n    \"unit_name\": \"minute\",\n    \"display_name\":
+      \"6 Minutes\"\n  },\n  {\n    \"period_id\": \"10MIN\",\n    \"length_seconds\":
+      600,\n    \"length_months\": 0,\n    \"unit_count\": 10,\n    \"unit_name\":
+      \"minute\",\n    \"display_name\": \"10 Minutes\"\n  },\n  {\n    \"period_id\":
+      \"15MIN\",\n    \"length_seconds\": 900,\n    \"length_months\": 0,\n    \"unit_count\":
+      15,\n    \"unit_name\": \"minute\",\n    \"display_name\": \"15 Minutes\"\n
+      \ },\n  {\n    \"period_id\": \"20MIN\",\n    \"length_seconds\": 1200,\n    \"length_months\":
+      0,\n    \"unit_count\": 20,\n    \"unit_name\": \"minute\",\n    \"display_name\":
+      \"20 Minutes\"\n  },\n  {\n    \"period_id\": \"30MIN\",\n    \"length_seconds\":
+      1800,\n    \"length_months\": 0,\n    \"unit_count\": 30,\n    \"unit_name\":
+      \"minute\",\n    \"display_name\": \"30 Minutes\"\n  },\n  {\n    \"period_id\":
+      \"1HRS\",\n    \"length_seconds\": 3600,\n    \"length_months\": 0,\n    \"unit_count\":
+      1,\n    \"unit_name\": \"hour\",\n    \"display_name\": \"1 Hour\"\n  },\n  {\n
+      \   \"period_id\": \"2HRS\",\n    \"length_seconds\": 7200,\n    \"length_months\":
+      0,\n    \"unit_count\": 2,\n    \"unit_name\": \"hour\",\n    \"display_name\":
+      \"2 Hours\"\n  },\n  {\n    \"period_id\": \"3HRS\",\n    \"length_seconds\":
+      10800,\n    \"length_months\": 0,\n    \"unit_count\": 3,\n    \"unit_name\":
+      \"hour\",\n    \"display_name\": \"3 Hours\"\n  },\n  {\n    \"period_id\":
+      \"4HRS\",\n    \"length_seconds\": 14400,\n    \"length_months\": 0,\n    \"unit_count\":
+      4,\n    \"unit_name\": \"hour\",\n    \"display_name\": \"4 Hours\"\n  },\n
+      \ {\n    \"period_id\": \"6HRS\",\n    \"length_seconds\": 21600,\n    \"length_months\":
+      0,\n    \"unit_count\": 6,\n    \"unit_name\": \"hour\",\n    \"display_name\":
+      \"6 Hours\"\n  },\n  {\n    \"period_id\": \"8HRS\",\n    \"length_seconds\":
+      28800,\n    \"length_months\": 0,\n    \"unit_count\": 8,\n    \"unit_name\":
+      \"hour\",\n    \"display_name\": \"8 Hours\"\n  },\n  {\n    \"period_id\":
+      \"12HRS\",\n    \"length_seconds\": 43200,\n    \"length_months\": 0,\n    \"unit_count\":
+      12,\n    \"unit_name\": \"hour\",\n    \"display_name\": \"12 Hours\"\n  },\n
+      \ {\n    \"period_id\": \"1DAY\",\n    \"length_seconds\": 86400,\n    \"length_months\":
+      0,\n    \"unit_count\": 1,\n    \"unit_name\": \"day\",\n    \"display_name\":
+      \"1 Day\"\n  },\n  {\n    \"period_id\": \"2DAY\",\n    \"length_seconds\":
+      172800,\n    \"length_months\": 0,\n    \"unit_count\": 2,\n    \"unit_name\":
+      \"day\",\n    \"display_name\": \"2 Days\"\n  },\n  {\n    \"period_id\": \"3DAY\",\n
+      \   \"length_seconds\": 259200,\n    \"length_months\": 0,\n    \"unit_count\":
+      3,\n    \"unit_name\": \"day\",\n    \"display_name\": \"3 Days\"\n  },\n  {\n
+      \   \"period_id\": \"5DAY\",\n    \"length_seconds\": 432000,\n    \"length_months\":
+      0,\n    \"unit_count\": 5,\n    \"unit_name\": \"day\",\n    \"display_name\":
+      \"5 Days\"\n  },\n  {\n    \"period_id\": \"7DAY\",\n    \"length_seconds\":
+      604800,\n    \"length_months\": 0,\n    \"unit_count\": 7,\n    \"unit_name\":
+      \"day\",\n    \"display_name\": \"7 Days\"\n  },\n  {\n    \"period_id\": \"10DAY\",\n
+      \   \"length_seconds\": 864000,\n    \"length_months\": 0,\n    \"unit_count\":
+      10,\n    \"unit_name\": \"day\",\n    \"display_name\": \"10 Days\"\n  }\n]"
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 Mar 2024 18:22:29 GMT
+      transfer-encoding:
+      - chunked
+      x-concurrencylimit-limit:
+      - '1'
+      x-concurrencylimit-remaining:
+      - '1'
+      x-ratelimit-limit:
+      - '100'
+      x-ratelimit-remaining:
+      - '50'
+      x-ratelimit-request-cost:
+      - '1'
+      x-ratelimit-used:
+      - '50'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

@@ -26,12 +26,12 @@ Algorithm is described below:
 
 ### Available Operations
 
-* [get_specific_rate](#get_specific_rate) - [exchange rates] Get specific rate
-* [get_v1_exchangerate_asset_id_base](#get_v1_exchangerate_asset_id_base) - [exchange rates] Get all current rates
-* [get_v1_exchangerate_history_periods](#get_v1_exchangerate_history_periods) - [exchange rates] Timeseries periods
-* [get_v1_exchangerate_asset_id_base_asset_id_quote_history](#get_v1_exchangerate_asset_id_base_asset_id_quote_history) - [exchange rates] Timeseries data
+* [get_v1_specific_rate](#get_v1_specific_rate) - [exchange rates] Get specific rate
+* [get_v1_base_rates](#get_v1_base_rates) - [exchange rates] Get all current rates
+* [get_v1_history_periods](#get_v1_history_periods) - [exchange rates] Timeseries periods
+* [get_v1_pair_history](#get_v1_pair_history) - [exchange rates] Timeseries data
 
-## get_specific_rate
+## get_v1_specific_rate
 
 Retrieves the exchange rate for a specific base and quote asset at a given time or the current rate.
             
@@ -48,8 +48,7 @@ s = coinapi.CoinAPI(
     api_key="<YOUR_API_KEY_HERE>",
 )
 
-
-res = s.exchange_rates.get_specific_rate(asset_id_base='<value>', asset_id_quote='<value>', time='<value>')
+res = s.exchange_rates.get_v1_specific_rate(asset_id_base='<value>', asset_id_quote='<value>', time='<value>')
 
 if res.content is not None:
     # handle response
@@ -67,14 +66,14 @@ if res.content is not None:
 
 ### Response
 
-**[operations.GetSpecificRateResponse](../../models/operations/getspecificrateresponse.md)**
+**[operations.GetV1SpecificRateResponse](../../models/operations/getv1specificrateresponse.md)**
 ### Errors
 
 | Error Object    | Status Code     | Content Type    |
 | --------------- | --------------- | --------------- |
 | errors.CoinAPIError | 4x-5xx          | */*             |
 
-## get_v1_exchangerate_asset_id_base
+## get_v1_base_rates
 
 Get the current exchange rate between requested asset and all other assets.
             
@@ -95,8 +94,8 @@ s = coinapi.CoinAPI(
     api_key="<YOUR_API_KEY_HERE>",
 )
 
-
-res = s.exchange_rates.get_v1_exchangerate_asset_id_base(asset_id_base='<value>', filter_asset_id='<value>', invert=False, time='<value>')
+res = s.exchange_rates.get_v1_base_rates(asset_id_base='<value>', filter_asset_id='<value>', invert=False,
+                                         time='<value>')
 
 if res.content is not None:
     # handle response
@@ -115,14 +114,14 @@ if res.content is not None:
 
 ### Response
 
-**[operations.GetV1ExchangerateAssetIDBaseResponse](../../models/operations/getv1exchangerateassetidbaseresponse.md)**
+**[operations.GetV1BaseRatesResponse](../../models/operations/getv1baseratesresponse.md)**
 ### Errors
 
 | Error Object    | Status Code     | Content Type    |
 | --------------- | --------------- | --------------- |
 | errors.CoinAPIError | 4x-5xx          | */*             |
 
-## get_v1_exchangerate_history_periods
+## get_v1_history_periods
 
 You can also obtain historical exchange rates of any asset pair, grouped into time periods.
 Get full list of supported time periods available for requesting exchange rates historical timeseries data.
@@ -144,8 +143,7 @@ s = coinapi.CoinAPI(
     api_key="<YOUR_API_KEY_HERE>",
 )
 
-
-res = s.exchange_rates.get_v1_exchangerate_history_periods()
+res = s.exchange_rates.get_v1_history_periods()
 
 if res.content is not None:
     # handle response
@@ -155,14 +153,14 @@ if res.content is not None:
 
 ### Response
 
-**[operations.GetV1ExchangerateHistoryPeriodsResponse](../../models/operations/getv1exchangeratehistoryperiodsresponse.md)**
+**[operations.GetV1HistoryPeriodsResponse](../../models/operations/getv1historyperiodsresponse.md)**
 ### Errors
 
 | Error Object    | Status Code     | Content Type    |
 | --------------- | --------------- | --------------- |
 | errors.CoinAPIError | 4x-5xx          | */*             |
 
-## get_v1_exchangerate_asset_id_base_asset_id_quote_history
+## get_v1_pair_history
 
 Get the historical exchange rates between two assets in the form of the timeseries.
 
@@ -176,12 +174,12 @@ s = coinapi.CoinAPI(
     api_key="<YOUR_API_KEY_HERE>",
 )
 
-req = operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest(
+req = operations.GetV1PairHistoryRequest(
     asset_id_base='<value>',
     asset_id_quote='<value>',
 )
 
-res = s.exchange_rates.get_v1_exchangerate_asset_id_base_asset_id_quote_history(req)
+res = s.exchange_rates.get_v1_pair_history(req)
 
 if res.content is not None:
     # handle response
@@ -192,12 +190,12 @@ if res.content is not None:
 
 | Parameter                                                                                                                                              | Type                                                                                                                                                   | Required                                                                                                                                               | Description                                                                                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `request`                                                                                                                                              | [operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest](../../models/operations/getv1exchangerateassetidbaseassetidquotehistoryrequest.md) | :heavy_check_mark:                                                                                                                                     | The request object to use for the request.                                                                                                             |
+| `request`                                                                                                                                              | [operations.GetV1PairHistoryRequest](../../models/operations/getv1pairhistoryrequest.md) | :heavy_check_mark:                                                                                                                                     | The request object to use for the request.                                                                                                             |
 
 
 ### Response
 
-**[operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse](../../models/operations/getv1exchangerateassetidbaseassetidquotehistoryresponse.md)**
+**[operations.GetV1PairHistoryResponse](../../models/operations/getv1pairhistoryresponse.md)**
 ### Errors
 
 | Error Object    | Status Code     | Content Type    |

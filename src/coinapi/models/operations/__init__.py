@@ -3,25 +3,21 @@
 __all__ = (
     "CoinAPIRequest",
     "CoinAPIResponse",
-    "GetSpecificRateRequest",
-    "GetSpecificRateResponse",
     "GetV1AssetsAssetIDRequest",
     "GetV1AssetsAssetIDResponse",
     "GetV1AssetsIconsSizeRequest",
     "GetV1AssetsIconsSizeResponse",
     "GetV1AssetsRequest",
     "GetV1AssetsResponse",
-    "GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest",
-    "GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse",
-    "GetV1ExchangerateAssetIDBaseRequest",
-    "GetV1ExchangerateAssetIDBaseResponse",
-    "GetV1ExchangerateHistoryPeriodsResponse",
+    "GetV1BaseRatesRequest",
+    "GetV1BaseRatesResponse",
     "GetV1ExchangesExchangeIDRequest",
     "GetV1ExchangesExchangeIDResponse",
     "GetV1ExchangesIconsSizeRequest",
     "GetV1ExchangesIconsSizeResponse",
     "GetV1ExchangesRequest",
     "GetV1ExchangesResponse",
+    "GetV1HistoryPeriodsResponse",
     "GetV1IndexesIndexIDHistoryRequest",
     "GetV1IndexesIndexIDHistoryResponse",
     "GetV1IndexesIndexIDRequest",
@@ -70,6 +66,8 @@ __all__ = (
     "GetV1OrderbooksSymbolIDHistoryResponse",
     "GetV1OrderbooksSymbolIDLatestRequest",
     "GetV1OrderbooksSymbolIDLatestResponse",
+    "GetV1PairHistoryRequest",
+    "GetV1PairHistoryResponse",
     "GetV1QuotesCurrentRequest",
     "GetV1QuotesCurrentResponse",
     "GetV1QuotesLatestRequest",
@@ -80,6 +78,8 @@ __all__ = (
     "GetV1QuotesSymbolIDHistoryResponse",
     "GetV1QuotesSymbolIDLatestRequest",
     "GetV1QuotesSymbolIDLatestResponse",
+    "GetV1SpecificRateRequest",
+    "GetV1SpecificRateResponse",
     "GetV1SymbolsExchangeIDRequest",
     "GetV1SymbolsExchangeIDResponse",
     "GetV1SymbolsMapExchangeIDRequest",
@@ -96,17 +96,16 @@ __all__ = (
     "PutV1IndexesIndexIDJSONRequest",
     "PutV1IndexesIndexIDJSONResponse",
 )
+
 from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
-from coinapi.models.operations.get_specific_rate import *
 from coinapi.models.operations.get_v1_assets import *
 from coinapi.models.operations.get_v1_assets_asset_id_ import *
 from coinapi.models.operations.get_v1_assets_icons_size_ import *
-from coinapi.models.operations.get_v1_exchangerate_asset_id_base_ import *
-from coinapi.models.operations.get_v1_exchangerate_asset_id_base_asset_id_quote_history import *
-from coinapi.models.operations.get_v1_exchangerate_history_periods import *
+from coinapi.models.operations.get_v1_base_rates import *
 from coinapi.models.operations.get_v1_exchanges import *
 from coinapi.models.operations.get_v1_exchanges_exchange_id_ import *
 from coinapi.models.operations.get_v1_exchanges_icons_size_ import *
+from coinapi.models.operations.get_v1_history_periods import *
 from coinapi.models.operations.get_v1_indexes import *
 from coinapi.models.operations.get_v1_indexes_index_id_ import *
 from coinapi.models.operations.get_v1_indexes_index_id_history import *
@@ -133,11 +132,16 @@ from coinapi.models.operations.get_v1_orderbooks_symbol_id_current import *
 from coinapi.models.operations.get_v1_orderbooks_symbol_id_depth_current import *
 from coinapi.models.operations.get_v1_orderbooks_symbol_id_history import *
 from coinapi.models.operations.get_v1_orderbooks_symbol_id_latest import *
+from coinapi.models.operations.get_v1_pair_history import (
+    GetV1PairHistoryRequest,
+    GetV1PairHistoryResponse,
+)
 from coinapi.models.operations.get_v1_quotes_current import *
 from coinapi.models.operations.get_v1_quotes_latest import *
 from coinapi.models.operations.get_v1_quotes_symbol_id_current import *
 from coinapi.models.operations.get_v1_quotes_symbol_id_history import *
 from coinapi.models.operations.get_v1_quotes_symbol_id_latest import *
+from coinapi.models.operations.get_v1_specific_rate import *
 from coinapi.models.operations.get_v1_symbols import *
 from coinapi.models.operations.get_v1_symbols_exchange_id_ import *
 from coinapi.models.operations.get_v1_symbols_map_exchange_id_ import *

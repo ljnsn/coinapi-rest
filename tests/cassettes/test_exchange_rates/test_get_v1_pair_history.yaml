@@ -1,0 +1,83 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      X-CoinAPI-Key:
+      - OBFUSCATED
+      accept:
+      - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+      host:
+      - rest.coinapi.io
+      user-agent:
+      - coinapi-rest/python 0.0.1 CoinAPI v1
+    method: GET
+    uri: https://rest.coinapi.io/v1/exchangerate/BTC/USD/history?limit=10&period_id=1DAY
+  response:
+    content: "[\n  {\n    \"time_period_start\": \"2024-03-07T00:00:00.0000000Z\",\n
+      \   \"time_period_end\": \"2024-03-08T00:00:00.0000000Z\",\n    \"time_open\":
+      \"2024-03-07T00:00:00.0000000Z\",\n    \"time_close\": \"2024-03-07T18:22:00.0000000Z\",\n
+      \   \"rate_open\": 66118.50488454191,\n    \"rate_high\": 68020.95030827828,\n
+      \   \"rate_low\": 65684.51542269399,\n    \"rate_close\": 67650.31343148787\n
+      \ },\n  {\n    \"time_period_start\": \"2024-03-06T00:00:00.0000000Z\",\n    \"time_period_end\":
+      \"2024-03-07T00:00:00.0000000Z\",\n    \"time_open\": \"2024-03-06T00:00:00.0000000Z\",\n
+      \   \"time_close\": \"2024-03-06T23:59:00.0000000Z\",\n    \"rate_open\": 63799.853430002455,\n
+      \   \"rate_high\": 67609.0819344104,\n    \"rate_low\": 62859.66739352585,\n
+      \   \"rate_close\": 66102.78154848318\n  },\n  {\n    \"time_period_start\":
+      \"2024-03-05T00:00:00.0000000Z\",\n    \"time_period_end\": \"2024-03-06T00:00:00.0000000Z\",\n
+      \   \"time_open\": \"2024-03-05T00:00:00.0000000Z\",\n    \"time_close\": \"2024-03-05T23:59:00.0000000Z\",\n
+      \   \"rate_open\": 68355.34511682253,\n    \"rate_high\": 69063.5999976888,\n
+      \   \"rate_low\": 59621.67214536103,\n    \"rate_close\": 63775.736820794424\n
+      \ },\n  {\n    \"time_period_start\": \"2024-03-04T00:00:00.0000000Z\",\n    \"time_period_end\":
+      \"2024-03-05T00:00:00.0000000Z\",\n    \"time_open\": \"2024-03-04T00:00:00.0000000Z\",\n
+      \   \"time_close\": \"2024-03-04T23:59:00.0000000Z\",\n    \"rate_open\": 63152.35004303751,\n
+      \   \"rate_high\": 68552.89754385296,\n    \"rate_low\": 62768.2842031722,\n
+      \   \"rate_close\": 68357.72010248784\n  },\n  {\n    \"time_period_start\":
+      \"2024-03-03T00:00:00.0000000Z\",\n    \"time_period_end\": \"2024-03-04T00:00:00.0000000Z\",\n
+      \   \"time_open\": \"2024-03-03T00:00:00.0000000Z\",\n    \"time_close\": \"2024-03-03T23:59:00.0000000Z\",\n
+      \   \"rate_open\": 62042.107035571076,\n    \"rate_high\": 63251.68682604674,\n
+      \   \"rate_low\": 61449.32274528743,\n    \"rate_close\": 63175.196410565004\n
+      \ },\n  {\n    \"time_period_start\": \"2024-03-02T00:00:00.0000000Z\",\n    \"time_period_end\":
+      \"2024-03-03T00:00:00.0000000Z\",\n    \"time_open\": \"2024-03-02T00:00:00.0000000Z\",\n
+      \   \"time_close\": \"2024-03-02T23:59:00.0000000Z\",\n    \"rate_open\": 62433.09590992889,\n
+      \   \"rate_high\": 62471.42173482853,\n    \"rate_low\": 61667.47861407372,\n
+      \   \"rate_close\": 62037.193607876114\n  },\n  {\n    \"time_period_start\":
+      \"2024-03-01T00:00:00.0000000Z\",\n    \"time_period_end\": \"2024-03-02T00:00:00.0000000Z\",\n
+      \   \"time_open\": \"2024-03-01T00:00:00.0000000Z\",\n    \"time_close\": \"2024-03-01T23:59:00.0000000Z\",\n
+      \   \"rate_open\": 61176.79298630907,\n    \"rate_high\": 63238.85976458715,\n
+      \   \"rate_low\": 60804.08151075978,\n    \"rate_close\": 62428.1977754896\n
+      \ },\n  {\n    \"time_period_start\": \"2024-02-29T00:00:00.0000000Z\",\n    \"time_period_end\":
+      \"2024-03-01T00:00:00.0000000Z\",\n    \"time_open\": \"2024-02-29T00:00:00.0000000Z\",\n
+      \   \"time_close\": \"2024-02-29T23:59:00.0000000Z\",\n    \"rate_open\": 62509.24737987221,\n
+      \   \"rate_high\": 63612.09375993306,\n    \"rate_low\": 60502.04861015369,\n
+      \   \"rate_close\": 61193.73865178221\n  },\n  {\n    \"time_period_start\":
+      \"2024-02-28T00:00:00.0000000Z\",\n    \"time_period_end\": \"2024-02-29T00:00:00.0000000Z\",\n
+      \   \"time_open\": \"2024-02-28T00:00:00.0000000Z\",\n    \"time_close\": \"2024-02-28T23:59:00.0000000Z\",\n
+      \   \"rate_open\": 57074.29874028195,\n    \"rate_high\": 63795.11962393157,\n
+      \   \"rate_low\": 56740.40151734359,\n    \"rate_close\": 62527.329414622865\n
+      \ },\n  {\n    \"time_period_start\": \"2024-02-27T00:00:00.0000000Z\",\n    \"time_period_end\":
+      \"2024-02-28T00:00:00.0000000Z\",\n    \"time_open\": \"2024-02-27T00:00:00.0000000Z\",\n
+      \   \"time_close\": \"2024-02-27T23:59:00.0000000Z\",\n    \"rate_open\": 54529.727431039246,\n
+      \   \"rate_high\": 57544.29551188759,\n    \"rate_low\": 54501.47782353409,\n
+      \   \"rate_close\": 57102.07213027876\n  }\n]"
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 Mar 2024 18:22:29 GMT
+      transfer-encoding:
+      - chunked
+      x-concurrencylimit-limit:
+      - '1'
+      x-concurrencylimit-remaining:
+      - '1'
+      x-ratelimit-limit:
+      - '100'
+      x-ratelimit-remaining:
+      - '50'
+      x-ratelimit-request-cost:
+      - '1'
+      x-ratelimit-used:
+      - '50'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

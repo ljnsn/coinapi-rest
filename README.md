@@ -47,10 +47,10 @@ if res.content is not None:
 
 ### [exchange_rates](docs/sdks/exchangerates/README.md)
 
-* [get_specific_rate](docs/sdks/exchangerates/README.md#get_specific_rate) - [exchange rates] Get specific rate
-* [get_v1_exchangerate_asset_id_base](docs/sdks/exchangerates/README.md#get_v1_exchangerate_asset_id_base) - [exchange rates] Get all current rates
-* [get_v1_exchangerate_history_periods](docs/sdks/exchangerates/README.md#get_v1_exchangerate_history_periods) - [exchange rates] Timeseries periods
-* [get_v1_exchangerate_asset_id_base_asset_id_quote_history](docs/sdks/exchangerates/README.md#get_v1_exchangerate_asset_id_base_asset_id_quote_history) - [exchange rates] Timeseries data
+* [get_v1_specific_rate](docs/sdks/exchangerates/README.md#get_v1_specific_rate) - [exchange rates] Get specific rate
+* [get_v1_base_rates](docs/sdks/exchangerates/README.md#get_v1_base_rates) - [exchange rates] Get all current rates
+* [get_v1_history_periods](docs/sdks/exchangerates/README.md#get_v1_history_periods) - [exchange rates] Timeseries periods
+* [get_v1_pair_history](docs/sdks/exchangerates/README.md#get_v1_pair_history) - [exchange rates] Timeseries data
 
 ### [indexes](docs/sdks/indexes/README.md)
 

@@ -1,4 +1,4 @@
-# GetV1ExchangerateHistoryPeriodsResponse
+# GetV1HistoryPeriodsResponse
 
 
 ## Fields

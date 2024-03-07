@@ -6,16 +6,11 @@ from typing import Annotated
 
 import msgspec
 
-from coinapi.models.components import (
-    v1_exchangeratestimeseriesitem as components_v1_exchangeratestimeseriesitem,
-)
+from coinapi.models.components import v1_exchangeratestimeseriesitem
 from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
 
 
-class GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest(
-    CoinAPIRequest,
-    frozen=True,
-):
+class GetV1PairHistoryRequest(CoinAPIRequest, frozen=True):
     """Get historical exchange rate data for a specific asset pair and time period."""
 
     method = "GET"
@@ -100,14 +95,10 @@ class GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest(
     r"""Amount of items to return (optional, mininum is 1, maximum is 100000, default value is 100, if the parameter is used then every 100 output items are counted as one request)"""
 
 
-class GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse(
-    CoinAPIResponse,
-    omit_defaults=True,
-):
+class GetV1PairHistoryResponse(CoinAPIResponse, omit_defaults=True):
     """Get historical exchange rate data for a specific asset pair and time period."""
 
     content: (
-        list[components_v1_exchangeratestimeseriesitem.V1ExchangeRatesTimeseriesItem]
-        | None
+        list[v1_exchangeratestimeseriesitem.V1ExchangeRatesTimeseriesItem] | None
     ) = msgspec.field(default=None)
     r"""successful operation"""
