@@ -1,56 +1,8 @@
 """Operations."""
 
-from coinapi.models.operations.get_specific_rate import *
-from coinapi.models.operations.get_v1_assets import *
-from coinapi.models.operations.get_v1_assets_asset_id_ import *
-from coinapi.models.operations.get_v1_assets_icons_size_ import *
-from coinapi.models.operations.get_v1_exchangerate_asset_id_base_ import *
-from coinapi.models.operations.get_v1_exchangerate_asset_id_base_asset_id_quote_history import *
-from coinapi.models.operations.get_v1_exchangerate_history_periods import *
-from coinapi.models.operations.get_v1_exchanges import *
-from coinapi.models.operations.get_v1_exchanges_exchange_id_ import *
-from coinapi.models.operations.get_v1_exchanges_icons_size_ import *
-from coinapi.models.operations.get_v1_indexes import *
-from coinapi.models.operations.get_v1_indexes_index_id_ import *
-from coinapi.models.operations.get_v1_indexes_index_id_history import *
-from coinapi.models.operations.get_v1_indexes_index_id_timeseries import *
-from coinapi.models.operations.get_v1_indexes_index_id_timeseries_to_be_announced import *
-from coinapi.models.operations.get_v1_metadata import *
-from coinapi.models.operations.get_v1_metrics_asset_current import *
-from coinapi.models.operations.get_v1_metrics_asset_history import *
-from coinapi.models.operations.get_v1_metrics_asset_listing import *
-from coinapi.models.operations.get_v1_metrics_exchange_current import *
-from coinapi.models.operations.get_v1_metrics_exchange_history import *
-from coinapi.models.operations.get_v1_metrics_exchange_listing import *
-from coinapi.models.operations.get_v1_metrics_listing import *
-from coinapi.models.operations.get_v1_metrics_symbol_current import *
-from coinapi.models.operations.get_v1_metrics_symbol_history import *
-from coinapi.models.operations.get_v1_metrics_symbol_listing import *
-from coinapi.models.operations.get_v1_ohlcv_exchanges_exchange_id_history import *
-from coinapi.models.operations.get_v1_ohlcv_periods import *
-from coinapi.models.operations.get_v1_ohlcv_symbol_id_history import *
-from coinapi.models.operations.get_v1_ohlcv_symbol_id_latest import *
-from coinapi.models.operations.get_v1_orderbooks3_current import *
-from coinapi.models.operations.get_v1_orderbooks3_symbol_id_current import *
-from coinapi.models.operations.get_v1_orderbooks_symbol_id_current import *
-from coinapi.models.operations.get_v1_orderbooks_symbol_id_depth_current import *
-from coinapi.models.operations.get_v1_orderbooks_symbol_id_history import *
-from coinapi.models.operations.get_v1_orderbooks_symbol_id_latest import *
-from coinapi.models.operations.get_v1_quotes_current import *
-from coinapi.models.operations.get_v1_quotes_latest import *
-from coinapi.models.operations.get_v1_quotes_symbol_id_current import *
-from coinapi.models.operations.get_v1_quotes_symbol_id_history import *
-from coinapi.models.operations.get_v1_quotes_symbol_id_latest import *
-from coinapi.models.operations.get_v1_symbols import *
-from coinapi.models.operations.get_v1_symbols_exchange_id_ import *
-from coinapi.models.operations.get_v1_symbols_map_exchange_id_ import *
-from coinapi.models.operations.get_v1_trades_latest import *
-from coinapi.models.operations.get_v1_trades_symbol_id_history import *
-from coinapi.models.operations.get_v1_trades_symbol_id_latest import *
-from coinapi.models.operations.post_v1_indexes_json import *
-from coinapi.models.operations.put_v1_indexes_index_id_json import *
-
-__all__ = [
+__all__ = (
+    "CoinAPIRequest",
+    "CoinAPIResponse",
     "GetSpecificRateRequest",
     "GetSpecificRateResponse",
     "GetV1AssetsAssetIDRequest",
@@ -143,4 +95,54 @@ __all__ = [
     "PostV1IndexesJSONResponse",
     "PutV1IndexesIndexIDJSONRequest",
     "PutV1IndexesIndexIDJSONResponse",
-]
+)
+from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
+from coinapi.models.operations.get_specific_rate import *
+from coinapi.models.operations.get_v1_assets import *
+from coinapi.models.operations.get_v1_assets_asset_id_ import *
+from coinapi.models.operations.get_v1_assets_icons_size_ import *
+from coinapi.models.operations.get_v1_exchangerate_asset_id_base_ import *
+from coinapi.models.operations.get_v1_exchangerate_asset_id_base_asset_id_quote_history import *
+from coinapi.models.operations.get_v1_exchangerate_history_periods import *
+from coinapi.models.operations.get_v1_exchanges import *
+from coinapi.models.operations.get_v1_exchanges_exchange_id_ import *
+from coinapi.models.operations.get_v1_exchanges_icons_size_ import *
+from coinapi.models.operations.get_v1_indexes import *
+from coinapi.models.operations.get_v1_indexes_index_id_ import *
+from coinapi.models.operations.get_v1_indexes_index_id_history import *
+from coinapi.models.operations.get_v1_indexes_index_id_timeseries import *
+from coinapi.models.operations.get_v1_indexes_index_id_timeseries_to_be_announced import *
+from coinapi.models.operations.get_v1_metadata import *
+from coinapi.models.operations.get_v1_metrics_asset_current import *
+from coinapi.models.operations.get_v1_metrics_asset_history import *
+from coinapi.models.operations.get_v1_metrics_asset_listing import *
+from coinapi.models.operations.get_v1_metrics_exchange_current import *
+from coinapi.models.operations.get_v1_metrics_exchange_history import *
+from coinapi.models.operations.get_v1_metrics_exchange_listing import *
+from coinapi.models.operations.get_v1_metrics_listing import *
+from coinapi.models.operations.get_v1_metrics_symbol_current import *
+from coinapi.models.operations.get_v1_metrics_symbol_history import *
+from coinapi.models.operations.get_v1_metrics_symbol_listing import *
+from coinapi.models.operations.get_v1_ohlcv_exchanges_exchange_id_history import *
+from coinapi.models.operations.get_v1_ohlcv_periods import *
+from coinapi.models.operations.get_v1_ohlcv_symbol_id_history import *
+from coinapi.models.operations.get_v1_ohlcv_symbol_id_latest import *
+from coinapi.models.operations.get_v1_orderbooks3_current import *
+from coinapi.models.operations.get_v1_orderbooks3_symbol_id_current import *
+from coinapi.models.operations.get_v1_orderbooks_symbol_id_current import *
+from coinapi.models.operations.get_v1_orderbooks_symbol_id_depth_current import *
+from coinapi.models.operations.get_v1_orderbooks_symbol_id_history import *
+from coinapi.models.operations.get_v1_orderbooks_symbol_id_latest import *
+from coinapi.models.operations.get_v1_quotes_current import *
+from coinapi.models.operations.get_v1_quotes_latest import *
+from coinapi.models.operations.get_v1_quotes_symbol_id_current import *
+from coinapi.models.operations.get_v1_quotes_symbol_id_history import *
+from coinapi.models.operations.get_v1_quotes_symbol_id_latest import *
+from coinapi.models.operations.get_v1_symbols import *
+from coinapi.models.operations.get_v1_symbols_exchange_id_ import *
+from coinapi.models.operations.get_v1_symbols_map_exchange_id_ import *
+from coinapi.models.operations.get_v1_trades_latest import *
+from coinapi.models.operations.get_v1_trades_symbol_id_history import *
+from coinapi.models.operations.get_v1_trades_symbol_id_latest import *
+from coinapi.models.operations.post_v1_indexes_json import *
+from coinapi.models.operations.put_v1_indexes_index_id_json import *
