@@ -67,7 +67,7 @@ jobs:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}
           path: reports/.coverage
