@@ -1,4 +1,4 @@
-# GetSpecificRateRequest
+# GetV1SpecificRateRequest
 
 
 ## Fields

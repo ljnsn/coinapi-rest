@@ -1,4 +1,4 @@
-# GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse
+# GetV1PairHistoryResponse
 
 
 ## Fields

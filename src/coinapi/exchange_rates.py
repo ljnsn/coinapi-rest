@@ -24,13 +24,13 @@ class ExchangeRates(Base):
       1. By traversing the tree structure using the BFS algorithm and our secret sauce, we are able to establish the final exchange rates.
     """
 
-    def get_specific_rate(
+    def get_v1_specific_rate(
         self,
         asset_id_base: str,
         asset_id_quote: str,
         time: str | None = None,
         accept_header_override: AcceptEnum | None = None,
-    ) -> operations.GetSpecificRateResponse:
+    ) -> operations.GetV1SpecificRateResponse:
         r"""[exchange rates] Get specific rate.
 
         Retrieves the exchange rate for a specific base and quote asset at a given time or the current rate.
@@ -41,23 +41,23 @@ class ExchangeRates(Base):
         """
         return self._make_request(
             "Get specific rate",
-            operations.GetSpecificRateRequest(
+            operations.GetV1SpecificRateRequest(
                 asset_id_base=asset_id_base,
                 asset_id_quote=asset_id_quote,
                 time=time,
             ),
-            operations.GetSpecificRateResponse,
+            operations.GetV1SpecificRateResponse,
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_exchangerate_asset_id_base(  # noqa: PLR0913
+    def get_v1_base_rates(  # noqa: PLR0913
         self,
         asset_id_base: str,
         filter_asset_id: str | None = None,
         invert: bool | None = None,
         time: str | None = None,
         accept_header_override: AcceptEnum | None = None,
-    ) -> operations.GetV1ExchangerateAssetIDBaseResponse:
+    ) -> operations.GetV1BaseRatesResponse:
         r"""[exchange rates] Get all current rates.
 
         Get the current exchange rate between requested asset and all other assets.
@@ -72,20 +72,20 @@ class ExchangeRates(Base):
         """
         return self._make_request(
             "get_/v1/exchangerate/{asset_id_base}",
-            operations.GetV1ExchangerateAssetIDBaseRequest(
+            operations.GetV1BaseRatesRequest(
                 asset_id_base=asset_id_base,
                 filter_asset_id=filter_asset_id,
                 invert=invert,
                 time=time,
             ),
-            operations.GetV1ExchangerateAssetIDBaseResponse,
+            operations.GetV1BaseRatesResponse,
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_exchangerate_history_periods(
+    def get_v1_history_periods(
         self,
         accept_header_override: AcceptEnum | None = None,
-    ) -> operations.GetV1ExchangerateHistoryPeriodsResponse:
+    ) -> operations.GetV1HistoryPeriodsResponse:
         r"""[exchange rates] Timeseries periods.
 
         You can also obtain historical exchange rates of any asset pair, grouped into time periods.
@@ -101,16 +101,16 @@ class ExchangeRates(Base):
         """
         return self._make_request(
             "get_/v1/exchangerate/history/periods",
-            operations.GetV1ExchangerateHistoryPeriodsRequest(),
-            operations.GetV1ExchangerateHistoryPeriodsResponse,
+            operations.GetV1HistoryPeriodsRequest(),
+            operations.GetV1HistoryPeriodsResponse,
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_exchangerate_asset_id_base_asset_id_quote_history(
+    def get_v1_pair_history(
         self,
-        request: operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest,
+        request: operations.GetV1PairHistoryRequest,
         accept_header_override: AcceptEnum | None = None,
-    ) -> operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse:
+    ) -> operations.GetV1PairHistoryResponse:
         r"""[exchange rates] Timeseries data.
 
         Get the historical exchange rates between two assets in the form of the timeseries.
@@ -118,6 +118,6 @@ class ExchangeRates(Base):
         return self._make_request(
             "get_/v1/exchangerate/{asset_id_base}/{asset_id_quote}/history",
             request,
-            operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryResponse,
+            operations.GetV1PairHistoryResponse,
             accept_header_override=accept_header_override,
         )

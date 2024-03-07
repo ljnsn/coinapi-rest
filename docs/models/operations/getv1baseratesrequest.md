@@ -1,4 +1,4 @@
-# GetV1ExchangerateAssetIDBaseRequest
+# GetV1BaseRatesRequest
 
 
 ## Fields

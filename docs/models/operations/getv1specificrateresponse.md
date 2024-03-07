@@ -1,4 +1,4 @@
-# GetSpecificRateResponse
+# GetV1SpecificRateResponse
 
 
 ## Fields

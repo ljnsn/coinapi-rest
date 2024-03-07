@@ -10,7 +10,7 @@ from coinapi.models.components import v1_exchangerate as components_v1_exchanger
 from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
 
 
-class GetSpecificRateRequest(CoinAPIRequest, frozen=True):
+class GetV1SpecificRateRequest(CoinAPIRequest, frozen=True):
     """[exchange rates] Get specific rate."""
 
     method = "GET"
@@ -52,7 +52,7 @@ class GetSpecificRateRequest(CoinAPIRequest, frozen=True):
     r"""Time at which exchange rate is calculated (optional, if not supplied then current rate is returned)"""
 
 
-class GetSpecificRateResponse(CoinAPIResponse, omit_defaults=True):
+class GetV1SpecificRateResponse(CoinAPIResponse, omit_defaults=True):
     """[exchange rates] Get specific rate."""
 
     content: components_v1_exchangerate.V1ExchangeRate | None = msgspec.field(

@@ -6,13 +6,11 @@ from typing import Annotated
 
 import msgspec
 
-from coinapi.models.components import (
-    v1_exchangeratesrate as components_v1_exchangeratesrate,
-)
+from coinapi.models.components import v1_exchangeratesrate
 from coinapi.models.operations.base import CoinAPIRequest, CoinAPIResponse
 
 
-class GetV1ExchangerateAssetIDBaseRequest(CoinAPIRequest, frozen=True):
+class GetV1BaseRatesRequest(CoinAPIRequest, frozen=True):
     """Get specific exchange rate for a specific base and quote asset at a given time or the current rate."""
 
     method = "GET"
@@ -69,10 +67,8 @@ class GetV1ExchangerateAssetIDBaseRequest(CoinAPIRequest, frozen=True):
 
 # NOTE: the spec for this response is wrong. Supposedly, the `V1ExchangeRatesRate` array is returned directly,
 #       but the actual response is a JSON object with a `rates` field containing the array.
-class GetV1ExchangerateAssetIDBaseResponse(CoinAPIResponse, omit_defaults=True):
+class GetV1BaseRatesResponse(CoinAPIResponse, omit_defaults=True):
     """Get specific exchange rate for a specific base and quote asset at a given time or the current rate."""
 
-    content: components_v1_exchangeratesrate.V1ExchangeRates | None = msgspec.field(
-        default=None,
-    )
+    content: v1_exchangeratesrate.V1ExchangeRates | None = msgspec.field(default=None)
     r"""successful operation"""

@@ -8,9 +8,9 @@ from coinapi.models import operations
 
 
 @pytest.mark.vcr()
-def test_get_specific_rate(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
-    """Test get_specific_rate."""
-    response = coinapi.exchange_rates.get_specific_rate(
+def test_get_v1_specific_rate(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
+    """Test get_v1_specific_rate."""
+    response = coinapi.exchange_rates.get_v1_specific_rate(
         asset_id_base="BTC",
         asset_id_quote="USD",
         time="2021-01-01",
@@ -22,12 +22,12 @@ def test_get_specific_rate(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> Non
 
 
 @pytest.mark.vcr()
-def test_get_v1_exchangerate_asset_id_base(
+def test_get_v1_base_rates(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
 ) -> None:
-    """Test get_v1_exchangerate_asset_id_base."""
-    response = coinapi.exchange_rates.get_v1_exchangerate_asset_id_base(
+    """Test get_v1_base_rates."""
+    response = coinapi.exchange_rates.get_v1_base_rates(
         asset_id_base="IOTA",
     )
 
@@ -37,12 +37,12 @@ def test_get_v1_exchangerate_asset_id_base(
 
 
 @pytest.mark.vcr()
-def test_get_v1_exchangerate_history_periods(
+def test_get_v1_history_periods(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
 ) -> None:
-    """Test get_v1_exchangerate_history_periods."""
-    response = coinapi.exchange_rates.get_v1_exchangerate_history_periods()
+    """Test get_v1_history_periods."""
+    response = coinapi.exchange_rates.get_v1_history_periods()
 
     assert response.status_code == 200
     assert response.content is not None
@@ -50,21 +50,19 @@ def test_get_v1_exchangerate_history_periods(
 
 
 @pytest.mark.vcr()
-def test_get_v1_exchangerate_asset_id_base_asset_id_quote_history(
+def test_get_v1_pair_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test getting exchange rate history between two assets."""
-    request = operations.GetV1ExchangerateAssetIDBaseAssetIDQuoteHistoryRequest(
+    request = operations.GetV1PairHistoryRequest(
         asset_id_base="BTC",
         asset_id_quote="USD",
         period_id="1DAY",
         limit=10,
     )
-    response = (
-        coinapi.exchange_rates.get_v1_exchangerate_asset_id_base_asset_id_quote_history(
-            request,
-        )
+    response = coinapi.exchange_rates.get_v1_pair_history(
+        request,
     )
 
     assert response.status_code == 200
