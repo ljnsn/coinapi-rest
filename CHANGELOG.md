@@ -1,3 +1,15 @@
+## v0.0.4 (2024-03-07)
+
+### ♻️  Refactorings
+
+- rename exchange rate operations (#15)
+
+### 💚👷 CI & Build
+
+- fix checking out (#14)
+- **deps**: bump pdm-project/setup-pdm from 3 to 4 (#13)
+- **deps**: bump actions/checkout from 3 to 4 (#12)
+
 ## v0.0.3 (2024-03-07)
 
 ### 🐛🚑️ Fixes
