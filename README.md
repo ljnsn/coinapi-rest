@@ -1,5 +1,10 @@
 # CoinAPI REST
 
+[![Coverage Status](https://coveralls.io/repos/github/ljnsn/coinapi-rest/badge.svg?branch=ci/coveralls)](https://coveralls.io/github/ljnsn/coinapi-rest?branch=ci/coveralls)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![image](https://img.shields.io/pypi/v/coinapi-rest)](https://pypi.python.org/pypi/coinapi-rest)
+[![image](https://img.shields.io/pypi/pyversions/coinapi-rest.svg)](https://pypi.python.org/pypi/coinapi-rest)
+
 ## Installation
 
 ```bash
