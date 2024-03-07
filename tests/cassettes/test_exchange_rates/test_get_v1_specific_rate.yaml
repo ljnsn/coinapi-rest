@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      X-CoinAPI-Key:
+      - OBFUSCATED
+      accept:
+      - application/json;q=1, text/json;q=0.8, text/plain;q=0.5, application/x-msgpack;q=0
+      host:
+      - rest.coinapi.io
+      user-agent:
+      - coinapi-rest/python 0.0.1 CoinAPI v1
+    method: GET
+    uri: https://rest.coinapi.io/v1/exchangerate/BTC/USD?time=2021-01-01
+  response:
+    content: "{\n  \"time\": \"2020-12-31T23:59:00.0000000Z\",\n  \"asset_id_base\":
+      \"BTC\",\n  \"asset_id_quote\": \"USD\",\n  \"rate\": 28990.2304752255\n}"
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 Mar 2024 18:22:28 GMT
+      transfer-encoding:
+      - chunked
+      x-concurrencylimit-limit:
+      - '1'
+      x-concurrencylimit-remaining:
+      - '1'
+      x-ratelimit-limit:
+      - '100'
+      x-ratelimit-request-cost:
+      - '1'
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1
