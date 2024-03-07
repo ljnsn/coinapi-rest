@@ -64,7 +64,7 @@ jobs:
       - name: Archive code coverage results
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-${{ matrix.package }}-${{ matrix.python-version }}
+          name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}
           path: reports/.coverage
 
   upload-coverage:
