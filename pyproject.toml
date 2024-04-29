@@ -4,10 +4,10 @@ version = "0.0.4"
 description = "CoinAPI Python REST Client"
 authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
 dependencies = [
-    "typing-inspect>=0.9.0",
-    "msgspec>=0.18.6",
-    "httpx>=0.27.0",
-    "python-dotenv>=1.0.1",
+  "typing-inspect>=0.9.0",
+  "msgspec>=0.18.6",
+  "httpx>=0.27.0",
+  "python-dotenv>=1.0.1",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -15,18 +15,18 @@ license = { text = "MIT" }
 urls = { repository = "https://github.com/ljnsn/coinapi-rest" }
 keywords = ["cryptocurrency", "crypto", "prices", "coinapi"]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3 :: Only",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
 ]
 
 [build-system]
@@ -83,95 +83,95 @@ line-length = 88
 logger-objects = ["loguru"]
 select = ["ALL"]
 ignore = [
-    # Missing docstring in public module
-    "D100",
-    # Missing docstring in `__init__`
-    "D107",
-    # Multi-line docstring summary should start at the first line
-    "D212",
-    # Class attribute `id` is shadowing a python builtin
-    "A003",
-    # Missing type annotation for `self` in method
-    "ANN101",
-    # Missing type annotation for `cls` in classmethod
-    "ANN102",
-    # Dynamically typed expressions (typing.Any) are disallowed in `*args`
-    "ANN401",
-    # Exception must not use a string literal, assign to variable first
-    "EM101",
-    # Missing authot in TODO
-    "TD002",
-    # Missing issue link on the line following this TODO
-    "TD003",
-    # Line contains TODO
-    "FIX002",
-    # Avoid specifying long messages outside the exception class
-    "TRY003",
-    # Move application import into a type-checking block
-    "TCH001",
-    # Move third-party import into a type-checking block
-    "TCH002",
-    # Move standard library import into a type-checking block
-    "TCH003",
-    # Invalid TODO tag
-    "TD001",
-    # Line contains FIXME, consider resolving the issue
-    "FIX001",
-    #############################################################################
-    # Rules conflicting with `ruff format`
-    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
-    #############################################################################
-    # Checks for indentation that uses tabs.
-    "W191",
-    # Checks for indentation with a non-multiple of 4 spaces.
-    "E111",
-    # Checks for indentation of comments with a non-multiple of 4 spaces.
-    "E114",
-    # Checks for over-indented code.
-    "E117",
-    # Line length violation
-    "E501",
-    # Checks for docstrings that are indented with tabs.
-    "D206",
-    # Checks for docstrings that use '''triple single quotes''' instead of """triple double quotes"""
-    "D300",
-    # Make sure that inline strings are quoted consistently.
-    "Q000",
-    # Make sure that multiline strings are quoted consistently.
-    "Q001",
-    # Make sure that docstrings are quoted consistently.
-    "Q002",
-    # Checks for strings that include escaped quotes
-    "Q003",
-    # Missing trailing comma
-    # "COM812",
-    # Prohibited trailing comma
-    "COM819",
-    # Single line implicit string concatenation
-    "ISC001",
-    # Multiline implicit string concatenation
-    "ISC002",
-    # from * used; unable to detect undefined names
-    "F403",
-    # may be undefined, or defined from star imports
-    "F405",
-    # Docstring contains ambiguous `’`
-    "RUF002",
+  # Missing docstring in public module
+  "D100",
+  # Missing docstring in `__init__`
+  "D107",
+  # Multi-line docstring summary should start at the first line
+  "D212",
+  # Class attribute `id` is shadowing a python builtin
+  "A003",
+  # Missing type annotation for `self` in method
+  "ANN101",
+  # Missing type annotation for `cls` in classmethod
+  "ANN102",
+  # Dynamically typed expressions (typing.Any) are disallowed in `*args`
+  "ANN401",
+  # Exception must not use a string literal, assign to variable first
+  "EM101",
+  # Missing authot in TODO
+  "TD002",
+  # Missing issue link on the line following this TODO
+  "TD003",
+  # Line contains TODO
+  "FIX002",
+  # Avoid specifying long messages outside the exception class
+  "TRY003",
+  # Move application import into a type-checking block
+  "TCH001",
+  # Move third-party import into a type-checking block
+  "TCH002",
+  # Move standard library import into a type-checking block
+  "TCH003",
+  # Invalid TODO tag
+  "TD001",
+  # Line contains FIXME, consider resolving the issue
+  "FIX001",
+  #############################################################################
+  # Rules conflicting with `ruff format`
+  # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+  #############################################################################
+  # Checks for indentation that uses tabs.
+  "W191",
+  # Checks for indentation with a non-multiple of 4 spaces.
+  "E111",
+  # Checks for indentation of comments with a non-multiple of 4 spaces.
+  "E114",
+  # Checks for over-indented code.
+  "E117",
+  # Line length violation
+  "E501",
+  # Checks for docstrings that are indented with tabs.
+  "D206",
+  # Checks for docstrings that use '''triple single quotes''' instead of """triple double quotes"""
+  "D300",
+  # Make sure that inline strings are quoted consistently.
+  "Q000",
+  # Make sure that multiline strings are quoted consistently.
+  "Q001",
+  # Make sure that docstrings are quoted consistently.
+  "Q002",
+  # Checks for strings that include escaped quotes
+  "Q003",
+  # Missing trailing comma
+  # "COM812",
+  # Prohibited trailing comma
+  "COM819",
+  # Single line implicit string concatenation
+  "ISC001",
+  # Multiline implicit string concatenation
+  "ISC002",
+  # from * used; unable to detect undefined names
+  "F403",
+  # may be undefined, or defined from star imports
+  "F405",
+  # Docstring contains ambiguous `’`
+  "RUF002",
 ]
 unfixable = ["ERA001", "F401", "F841"]
 
 [tool.ruff.lint.per-file-ignores]
 "test_*.py" = [
-    # The use of `datetime.datetime()` without `tzinfo` argument is not allowed
-    "DTZ001",
-    # positional boolean args
-    "FBT001",
-    # usage of `assert` in tests
-    "S101",
-    # magic value used in comarison
-    "PLR2004",
-    # private member accessed
-    "SLF001",
+  # The use of `datetime.datetime()` without `tzinfo` argument is not allowed
+  "DTZ001",
+  # positional boolean args
+  "FBT001",
+  # usage of `assert` in tests
+  "S101",
+  # magic value used in comarison
+  "PLR2004",
+  # private member accessed
+  "SLF001",
 ]
 
 [tool.ruff.format]
@@ -197,29 +197,24 @@ addopts = """--color=yes --doctest-modules --exitfirst --failed-first \
   --junitxml=reports/pytest.xml"""
 filterwarnings = ["ignore::DeprecationWarning", "ignore::ResourceWarning"]
 testpaths = ["src", "tests"]
-markers = [
-    "network: mark a test as needing a network connection",
-]
+markers = ["network: mark a test as needing a network connection"]
 
 [tool.pdm]
 distribution = true
 
 [tool.pdm.dev-dependencies]
-lint = [
-    "ruff>=0.3.0",
-    "mypy>=1.8.0",
-]
+lint = ["ruff>=0.3.0", "mypy>=1.8.0"]
 test = [
-    "pytest>=8.0.0",
-    "pytest-recording>=0.13.1",
-    "coverage>=7.4.3",
-    "syrupy>=0.0.15",
+  "pytest>=8.0.0",
+  "pytest-recording>=0.13.1",
+  "coverage>=7.4.3",
+  "syrupy>=0.0.15",
 ]
 dev = [
-    "ipython>=8.12.3",
-    "commitizen>=3.16.0",
-    "cz-conventional-gitmoji>=0.2.4",
-    "pre-commit>=3.6.2",
+  "ipython>=8.12.3",
+  "commitizen>=3.16.0",
+  "cz-conventional-gitmoji>=0.2.4",
+  "pre-commit>=3.6.2",
 ]
 
 [tool.pdm.scripts]
