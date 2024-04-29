@@ -203,7 +203,6 @@ markers = [
 
 [tool.pdm]
 distribution = true
-package-dir = "src"
 
 [tool.pdm.dev-dependencies]
 lint = [
