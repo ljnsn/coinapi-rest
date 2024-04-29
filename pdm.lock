@@ -215,18 +215,18 @@ files = [
 
 [[package]]
 name = "cz-conventional-gitmoji"
-version = "0.2.4"
-requires_python = ">=3.7,<4.0"
+version = "0.3.1"
+requires_python = "<4.0,>=3.7"
 summary = "A commitizen plugin that combines gitmoji and conventional."
 groups = ["dev"]
 dependencies = [
-    "attrs<24.0.0,>=23.1.0",
-    "commitizen<4.0.0,>=3.2.2",
+    "attrs>=23.1.0",
+    "commitizen>=3.2.2",
     "setuptools; python_version >= \"3.12\"",
 ]
 files = [
-    {file = "cz_conventional_gitmoji-0.2.4-py3-none-any.whl", hash = "sha256:83b88a6f95424bb0f9527631d53a48eb07dc68f1410db36cd20b32adaad65c07"},
-    {file = "cz_conventional_gitmoji-0.2.4.tar.gz", hash = "sha256:ecb0bdb6bb2c0aff4cdedaebcb11dcebe83073bf2b72751a129e444a58573690"},
+    {file = "cz_conventional_gitmoji-0.3.1-py3-none-any.whl", hash = "sha256:21977fcb23d16795d45028e10709a9c21136cf6ae4d45b2dbfee0218a266a2d3"},
+    {file = "cz_conventional_gitmoji-0.3.1.tar.gz", hash = "sha256:e2b381e6f5e4b28a46293a2d68202d0b851e415195eced14278843ea0eeeed74"},
 ]
 
 [[package]]
