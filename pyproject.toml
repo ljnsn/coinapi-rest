@@ -12,7 +12,7 @@ dependencies = [
 requires-python = ">=3.10"
 readme = "README.md"
 license = { text = "MIT" }
-repository = "https://github.com/ljnsn/coinapi-rest"
+urls = { repository = "https://github.com/ljnsn/coinapi-rest" }
 keywords = ["cryptocurrency", "crypto", "prices", "coinapi"]
 classifiers = [
     "Development Status :: 4 - Beta",
