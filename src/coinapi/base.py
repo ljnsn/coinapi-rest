@@ -93,7 +93,7 @@ class Base:
                 ),
             )
             http_res = client.send(req)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             _, exc = self.sdk_configuration.get_hooks().after_error(hook_ctx, None, e)  # type: ignore[arg-type]
             raise exc from e  # type: ignore[misc]
 
