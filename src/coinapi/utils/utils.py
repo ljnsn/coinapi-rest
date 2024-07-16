@@ -866,10 +866,7 @@ def match_content_type(content_type: str, pattern: str) -> boolean:
         return True
 
     parts = media_type.split("/")
-    if len(parts) == 2 and pattern in (f"{parts[0]}/*", f"*/{parts[1]}"):  # noqa: PLR2004
-        return True
-
-    return False
+    return len(parts) == 2 and pattern in (f"{parts[0]}/*", f"*/{parts[1]}")  # noqa: PLR2004
 
 
 def match_status_codes(status_codes: list[str], status_code: int) -> bool:
