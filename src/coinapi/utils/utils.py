@@ -1,5 +1,6 @@
 """Utilities."""
 
+import abc
 import base64
 import datetime as dt
 import re
@@ -835,11 +836,20 @@ def serialize_multipart_form(
     return serializer.serialize(request)
 
 
-def serialize_form_data(field_name: str, data: Any) -> dict[str, Any]:
-    """Serialize form data."""
-    form: dict[str, list[str]] = {}
+class FormDataSerializer(metaclass=abc.ABCMeta):
+    """Base class for form data serializers."""
 
-    if isinstance(data, msgspec.Struct):
+    @abc.abstractmethod
+    def serialize(self, field_name: str, data: Any) -> dict[str, list[str]]:
+        """Serialize form data."""
+
+
+class StructFormDataSerializer(FormDataSerializer):
+    """Serializer for Struct form data."""
+
+    def serialize(self, field_name: str, data: msgspec.Struct) -> dict[str, list[str]]:
+        """Serialize Struct form data."""
+        form: dict[str, list[str]] = {}
         for field in msgspec.structs.fields(data):
             val = getattr(data, field.name)
             if val is None:
@@ -854,27 +864,51 @@ def serialize_form_data(field_name: str, data: Any) -> dict[str, Any]:
             if metadata.get("json"):
                 form[field_name] = [marshal_json(val, field.type)]
             elif metadata.get("style", "form") == "form":
-                form = {
-                    **form,
-                    **_populate_form(
+                form.update(
+                    _populate_form(
                         field_name,
                         metadata.get("explode", True),
                         val,
                         _get_form_field_name,
                         ",",
                     ),
-                }
+                )
             else:
                 msg = f"Invalid form style for field {field.name}"
                 raise ValueError(msg)
-    elif isinstance(data, dict):
-        for key, value in data.items():
-            form[key] = [_val_to_string(value)]
-    else:
+        return form
+
+
+class DictFormDataSerializer(FormDataSerializer):
+    """Serializer for Dict form data."""
+
+    def serialize(self, _field_name: str, data: dict[str, Any]) -> dict[str, list[str]]:
+        """Serialize Dict form data."""
+        return {key: [_val_to_string(value)] for key, value in data.items()}
+
+
+class DefaultFormDataSerializer(FormDataSerializer):
+    """Serializer for default form data."""
+
+    def serialize(self, field_name: str, _data: Any) -> dict[str, list[str]]:
+        """Serialize default form data."""
         msg = f"Invalid request body type for field {field_name}"
         raise TypeError(msg)
 
-    return form
+
+def get_form_data_serializer(data: Any) -> FormDataSerializer:
+    """Get the appropriate form data serializer."""
+    if isinstance(data, msgspec.Struct):
+        return StructFormDataSerializer()
+    if isinstance(data, dict):
+        return DictFormDataSerializer()
+    return DefaultFormDataSerializer()
+
+
+def serialize_form_data(field_name: str, data: Any) -> dict[str, list[str]]:
+    """Serialize form data."""
+    serializer = get_form_data_serializer(data)
+    return serializer.serialize(field_name, data)
 
 
 def _get_form_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
