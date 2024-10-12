@@ -520,18 +520,29 @@ def _get_serialized_params(
     return params
 
 
-def _get_deep_object_query_params(  # noqa: PLR0912, C901
-    metadata: dict[str, Any],
-    field_name: str,
-    obj: Any,
-) -> dict[str, list[str]]:
-    """Get deep object query parameters."""
-    params: dict[str, list[str]] = {}
+class DeepObjectQueryParamProcessor:
+    """Processor for deep object query parameters."""
 
-    if obj is None:
-        return params
+    def __init__(self, metadata: dict[str, Any], field_name: str) -> None:
+        """Initialize the processor."""
+        self.metadata = metadata
+        self.field_name = field_name
+        self.params: dict[str, list[str]] = {}
 
-    if isinstance(obj, msgspec.Struct):
+    def process(self, obj: Any) -> dict[str, list[str]]:
+        """Process the input object."""
+        if obj is None:
+            return self.params
+        if isinstance(obj, msgspec.Struct):
+            self._process_struct(obj)
+        elif isinstance(obj, dict):
+            self._process_dict(obj)
+        elif isinstance(obj, list):
+            self._process_list(obj)
+        return self.params
+
+    def _process_struct(self, obj: msgspec.Struct) -> None:
+        """Process a msgspec.Struct object."""
         obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
         for obj_field in obj_fields:
             obj_param_metadata = get_metadata(obj_field).get("query_param")
@@ -542,52 +553,44 @@ def _get_deep_object_query_params(  # noqa: PLR0912, C901
             if obj_val is None:
                 continue
 
-            if isinstance(obj_val, list):
-                for val in obj_val:
-                    if val is None:
-                        continue
+            param_name = f'{self.metadata.get("field_name", self.field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
+            self._add_param(param_name, obj_val)
 
-                    if (
-                        params.get(
-                            f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]',
-                        )
-                        is None
-                    ):
-                        params[
-                            f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                        ] = []
-
-                    params[
-                        f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                    ].append(_val_to_string(val))
-            else:
-                params[
-                    f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                ] = [_val_to_string(obj_val)]
-    elif isinstance(obj, dict):
+    def _process_dict(self, obj: dict[str, Any]) -> None:
+        """Process a dictionary object."""
         for key, value in obj.items():
             if value is None:
                 continue
 
-            if isinstance(value, list):
-                for val in value:
-                    if val is None:
-                        continue
+            param_name = f'{self.metadata.get("field_name", self.field_name)}[{key}]'
+            self._add_param(param_name, value)
 
-                    if (
-                        params.get(f'{metadata.get("field_name", field_name)}[{key}]')
-                        is None
-                    ):
-                        params[f'{metadata.get("field_name", field_name)}[{key}]'] = []
+    def _process_list(self, obj: list[Any]) -> None:
+        """Process a list object."""
+        # This method is not used in the original implementation
+        # but added for completeness
+        raise NotImplementedError
 
-                    params[f'{metadata.get("field_name", field_name)}[{key}]'].append(
-                        _val_to_string(val),
-                    )
-            else:
-                params[f'{metadata.get("field_name", field_name)}[{key}]'] = [
-                    _val_to_string(value),
-                ]
-    return params
+    def _add_param(self, key: str, value: Any) -> None:
+        """Add a parameter to the result dictionary."""
+        if isinstance(value, list):
+            if key not in self.params:
+                self.params[key] = []
+            for val in value:
+                if val is not None:
+                    self.params[key].append(_val_to_string(val))
+        else:
+            self.params[key] = [_val_to_string(value)]
+
+
+def _get_deep_object_query_params(
+    metadata: dict[str, Any],
+    field_name: str,
+    obj: Any,
+) -> dict[str, list[str]]:
+    """Get deep object query parameters."""
+    processor = DeepObjectQueryParamProcessor(metadata, field_name)
+    return processor.process(obj)
 
 
 def _get_query_param_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
