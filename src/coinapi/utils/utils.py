@@ -10,7 +10,6 @@ from email.message import Message
 from enum import Enum
 from typing import (
     Any,
-    ClassVar,
     Protocol,
     Union,
     cast,
@@ -30,12 +29,16 @@ NOT_SUPPORTED = "not supported"
 class SecurityClient:
     """Client with security settings."""
 
-    client: httpx.Client | None
-    query_params: ClassVar[dict[str, str]] = {}
-    headers: ClassVar[dict[str, str]] = {}
-
-    def __init__(self, client: httpx.Client | None = None, timeout: int = 60) -> None:
+    def __init__(
+        self,
+        client: httpx.Client | None = None,
+        query_params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: int = 60,
+    ) -> None:
         self.client = client
+        self.query_params = query_params or {}
+        self.headers = headers or {}
         self.timeout = timeout
         self.limits = httpx.Limits(max_keepalive_connections=1, max_connections=1)
 
