@@ -107,6 +107,7 @@ jobs:
           merge-multiple: true
       - name: Combine coverage
         run: |
+          ls -al reports
           coverage combine reports
           coverage xml
       - name: Generate sonar properties
