@@ -37,6 +37,21 @@ class TestSecurityClient:
         response = client.send(request)
         assert isinstance(response, httpx.Response)
 
+    def test_parse_security_scheme_value_api_key_header(self) -> None:
+        """Test parsing security scheme value for API key in header."""
+        client = utils.SecurityClient()
+        scheme_metadata = {"type": "apiKey", "sub_type": "header"}
+        security_metadata = {"field_name": "X-API-Key"}
+
+        utils._parse_security_scheme_value(
+            client,
+            scheme_metadata,
+            security_metadata,
+            "test_api_key",
+        )
+
+        assert client.headers["X-API-Key"] == "test_api_key"
+
 
 class TestConfigureSecurityClient:
     """Tests for configure_security_client."""
@@ -409,6 +424,30 @@ class TestProcessQueryParam:
         result = utils.process_query_param(field, {"key": "value"}, None)
         assert result == {"param": ['{"key":"value"}']}
 
+    def test_populate_form_struct(self) -> None:
+        """Test populating form for Struct."""
+
+        class TestStruct(msgspec.Struct):
+            field1: Annotated[
+                str,
+                msgspec.Meta(extra={"query_param": {"field_name": "f1"}}),
+            ]
+            field2: Annotated[
+                int,
+                msgspec.Meta(extra={"query_param": {"field_name": "f2"}}),
+            ]
+
+        obj = TestStruct(field1="test", field2=42)
+        result = utils._populate_form(
+            "test_field",
+            obj,
+            utils._get_query_param_field_name,
+            ",",
+            explode=True,
+        )
+
+        assert result == {"f1": ["test"], "f2": ["42"]}
+
 
 class TestGetQueryParams:
     """Tests for get_query_params."""
@@ -450,6 +489,24 @@ class TestGetHeaders:
         headers = Headers(header1="value1", header2=42)
         result = utils.get_headers(headers)
         assert result == {"X-Header-1": "value1", "X-Header-2": "42"}
+
+    def test_serialize_header_struct(self) -> None:
+        """Test serializing header for Struct."""
+
+        class TestStruct(msgspec.Struct):
+            field1: Annotated[
+                str,
+                msgspec.Meta(extra={"header": {"field_name": "X-Field-1"}}),
+            ]
+            field2: Annotated[
+                int,
+                msgspec.Meta(extra={"header": {"field_name": "X-Field-2"}}),
+            ]
+
+        obj = TestStruct(field1="test", field2=42)
+        result = utils._serialize_header(obj, explode=True)
+
+        assert result == "X-Field-1=test,X-Field-2=42"
 
 
 class TestSerializeRequestBody:
@@ -732,6 +789,40 @@ class TestSerializeMultipartForm:
         assert form[0][0] == "file"
         assert form[0][1][0] == "test.txt"
         assert form[0][1][1] == b"file content"
+
+    def test_serialize_multipart_form_with_multiple_fields(self) -> None:
+        """Test serializing multipart form data with multiple fields."""
+
+        class TestRequest(msgspec.Struct):
+            file_field: Annotated[
+                File,
+                msgspec.Meta(extra={"multipart_form": {"file": True}}),
+            ]
+            json_field: Annotated[
+                dict[str, Any],
+                msgspec.Meta(extra={"multipart_form": {"json": True}}),
+            ]
+            regular_field: Annotated[
+                str,
+                msgspec.Meta(extra={"multipart_form": {"content": True}}),
+            ]
+
+        request = TestRequest(
+            file_field=File(filename="test.txt", content=b"test content"),
+            json_field={"key": "value"},
+            regular_field="test",
+        )
+
+        media_type, _, form = utils.serialize_multipart_form(
+            "multipart/form-data",
+            request,
+        )
+
+        assert media_type == "multipart/form-data"
+        assert len(form) == 3
+        assert any(item[0] == "file_field" for item in form)
+        assert any(item[0] == "json_field" for item in form)
+        assert any(item[0] == "regular_field" for item in form)
 
 
 class TestMultipartFormSerializer:
