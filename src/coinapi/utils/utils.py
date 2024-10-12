@@ -21,6 +21,8 @@ import httpx
 import msgspec
 from typing_inspect import is_optional_type
 
+NOT_SUPPORTED = "not supported"
+
 
 class SecurityClient:
     """Client with security settings."""
@@ -143,7 +145,7 @@ def _parse_security_scheme_value(
         elif sub_type == "query":
             client.query_params[header_name] = value
         else:
-            raise ValueError("not supported")
+            raise ValueError(NOT_SUPPORTED)
     elif scheme_type == "openIdConnect":
         client.headers[header_name] = _apply_bearer(value)
     elif scheme_type == "oauth2":
@@ -153,9 +155,9 @@ def _parse_security_scheme_value(
         if sub_type == "bearer":
             client.headers[header_name] = _apply_bearer(value)
         else:
-            raise ValueError("not supported")
+            raise ValueError(NOT_SUPPORTED)
     else:
-        raise ValueError("not supported")
+        raise ValueError(NOT_SUPPORTED)
 
 
 def _apply_bearer(token: str) -> str:
