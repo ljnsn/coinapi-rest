@@ -613,10 +613,10 @@ def _get_delimited_query_params(
     """Get delimited query parameters."""
     return _populate_form(
         field_name,
-        metadata.get("explode", True),
         obj,
         _get_query_param_field_name,
         delimiter,
+        explode=metadata.get("explode", True),
     )
 
 
@@ -867,10 +867,10 @@ class StructFormDataSerializer(FormDataSerializer):
                 form.update(
                     _populate_form(
                         field_name,
-                        metadata.get("explode", True),
                         val,
                         _get_form_field_name,
                         ",",
+                        explode=metadata.get("explode", True),
                     ),
                 )
             else:
@@ -921,20 +921,36 @@ def _get_form_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
     return cast(str, obj_param_metadata.get("field_name", obj_field.name))
 
 
-def _populate_form(  # noqa: PLR0912, C901
-    field_name: str,
-    explode: bool,  # noqa: FBT001
-    obj: Any,
-    get_field_name_func: Callable[..., str],
-    delimiter: str,
-) -> dict[str, list[str]]:
-    """Populate a form."""
-    params: dict[str, list[str]] = {}
+class FormPopulator(metaclass=abc.ABCMeta):
+    """Abstract base class for form populators."""
 
-    if obj is None:
-        return params
+    @abc.abstractmethod
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data."""
 
-    if isinstance(obj, msgspec.Struct):
+
+class StructFormPopulator(FormPopulator):
+    """Populator for msgspec.Struct objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for Struct objects."""
+        params: dict[str, list[str]] = {}
         items = []
 
         obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
@@ -952,22 +968,57 @@ def _populate_form(  # noqa: PLR0912, C901
             else:
                 items.append(f"{obj_field_name}{delimiter}{_val_to_string(val)}")
 
-        if len(items) > 0:
+        if items:
             params[field_name] = [delimiter.join(items)]
-    elif isinstance(obj, dict):
+
+        return params
+
+
+class DictFormPopulator(FormPopulator):
+    """Populator for dictionary objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: dict[str, Any],
+        _get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for dictionary objects."""
+        params: dict[str, list[str]] = {}
         items = []
+
         for key, value in obj.items():
             if value is None:
                 continue
 
             if explode:
-                params[key] = _val_to_string(value)  # type: ignore[assignment]
+                params[key] = [_val_to_string(value)]
             else:
                 items.append(f"{key}{delimiter}{_val_to_string(value)}")
 
-        if len(items) > 0:
+        if items:
             params[field_name] = [delimiter.join(items)]
-    elif isinstance(obj, list):
+
+        return params
+
+
+class ListFormPopulator(FormPopulator):
+    """Populator for list objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: list[Any],
+        _get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for list objects."""
+        params: dict[str, list[str]] = {}
         items = []
 
         for value in obj:
@@ -981,12 +1032,59 @@ def _populate_form(  # noqa: PLR0912, C901
             else:
                 items.append(_val_to_string(value))
 
-        if len(items) > 0:
-            params[field_name] = [delimiter.join([str(item) for item in items])]
-    else:
-        params[field_name] = [_val_to_string(obj)]
+        if items:
+            params[field_name] = [delimiter.join(items)]
 
-    return params
+        return params
+
+
+class DefaultFormPopulator(FormPopulator):
+    """Default populator for other object types."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        _get_field_name_func: Callable[..., str],
+        _delimiter: str,
+        *,
+        explode: bool,  # noqa: ARG002
+    ) -> dict[str, list[str]]:
+        """Populate form data for default object types."""
+        return {field_name: [_val_to_string(obj)]}
+
+
+def get_form_populator(obj: Any) -> FormPopulator:
+    """Get the appropriate form populator based on object type."""
+    if isinstance(obj, msgspec.Struct):
+        return StructFormPopulator()
+    if isinstance(obj, dict):
+        return DictFormPopulator()
+    if isinstance(obj, list):
+        return ListFormPopulator()
+    return DefaultFormPopulator()
+
+
+def _populate_form(
+    field_name: str,
+    obj: Any,
+    get_field_name_func: Callable[..., str],
+    delimiter: str,
+    *,
+    explode: bool,
+) -> dict[str, list[str]]:
+    """Populate a form using the appropriate populator."""
+    if obj is None:
+        return {}
+
+    populator = get_form_populator(obj)
+    return populator.populate(
+        field_name,
+        obj,
+        get_field_name_func,
+        delimiter,
+        explode=explode,
+    )
 
 
 def _serialize_header(explode: bool, obj: Any) -> str:  # noqa: PLR0912, C901, FBT001
