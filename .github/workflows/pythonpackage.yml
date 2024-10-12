@@ -92,6 +92,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Generate sonar properties
+        run: |
+          cat << EOF > sonar-project.properties
+          sonar.projectKey=ljnsn_coinapi-rest
+          sonar.organization=ljnsn
+          sonar.python.version=">=3.10"
+          sonar.python.coverage.reportPaths=reports/coverage.xml
+          sonar.sources=src/
+          sonar.tests=tests/
+          sonar.projectVersion="$(git describe --tags HEAD)"
+          EOF
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
