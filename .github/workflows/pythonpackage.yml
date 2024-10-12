@@ -102,11 +102,11 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
+          name: coverage-ubuntu-latest-3.12
           path: reports
-          pattern: coverage-*
-      - name: Combine coverage
+      - name: Create coverage XML
         run: |
-          coverage combine reports/**/.coverage
+          ls -al reports
           coverage xml
       - name: Generate sonar properties
         run: |
