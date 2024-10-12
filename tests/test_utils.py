@@ -106,6 +106,28 @@ class TestConfigureSecurityClient:
         expected_auth = base64.b64encode(b"user:pass").decode()
         assert client.headers == {"Authorization": f"Basic {expected_auth}"}
 
+    def test_configure_security_client_with_bearer_token(self) -> None:
+        """Test configuring security client with bearer token."""
+
+        class Security(msgspec.Struct):
+            bearer_token: Annotated[
+                str,
+                msgspec.Meta(
+                    extra={
+                        "security": {
+                            "scheme": True,
+                            "type": "http",
+                            "sub_type": "bearer",
+                            "field_name": "Authorization",
+                        },
+                    },
+                ),
+            ]
+
+        security = Security(bearer_token="test_token")  # noqa: S106
+        client = utils.configure_security_client(None, security)
+        assert client.headers == {"Authorization": "Bearer test_token"}
+
 
 class TestPathParamHandlers:
     """Tests for path param handlers."""
@@ -374,6 +396,19 @@ class TestProcessQueryParam:
         result = utils.process_query_param(field, {"x": 1, "y": 2}, None)
         assert result == {"param[x]": ["1"], "param[y]": ["2"]}
 
+    def test_process_query_param_serialization(self) -> None:
+        """Test processing query param with serialization."""
+
+        class QueryParams(msgspec.Struct):
+            param: Annotated[
+                dict[str, Any],
+                msgspec.Meta(extra={"query_param": {"serialization": "json"}}),
+            ]
+
+        field = msgspec.structs.fields(QueryParams)[0]
+        result = utils.process_query_param(field, {"key": "value"}, None)
+        assert result == {"param": ['{"key":"value"}']}
+
 
 class TestGetQueryParams:
     """Tests for get_query_params."""
@@ -435,6 +470,19 @@ class TestSerializeRequestBody:
         result = utils.serialize_request_body(request, "data")
         assert result == ("application/json", '{"key":"value"}', None)
 
+    def test_serialize_request_body_optional(self) -> None:
+        """Test serializing request body with optional field."""
+
+        class RequestBody(msgspec.Struct):
+            data: Annotated[
+                dict[str, Any] | None,
+                msgspec.Meta(extra={"request": {"media_type": "application/json"}}),
+            ]
+
+        request = RequestBody(data=None)
+        result = utils.serialize_request_body(request, "data")
+        assert result == (None, None, None)
+
 
 class TestSerializeContentType:
     """Tests for serialize_content_type."""
@@ -458,6 +506,37 @@ class TestSerializeContentType:
             {"key": "value"},  # type: ignore[arg-type]
         )
         assert result == ("application/x-www-form-urlencoded", {"key": ["value"]}, None)
+
+    def test_serialize_content_type_multipart(self) -> None:
+        """Test serializing content type to multipart form data."""
+
+        class MultipartData(msgspec.Struct):
+            file: Annotated[
+                File,
+                msgspec.Meta(
+                    extra={
+                        "multipart_form": {
+                            "file": True,
+                            "content": True,
+                            "field_name": "file",
+                        },
+                    },
+                ),
+            ]
+
+        data = MultipartData(file=File(filename="test.txt", content=b"content"))
+        result = utils.serialize_content_type(
+            "data",
+            MultipartData,
+            "multipart/form-data",
+            data,
+        )
+        assert result[0] == "multipart/form-data"
+        assert isinstance(result[2], list)
+        assert len(result[2]) == 1
+        assert result[2][0][0] == "file"
+        assert result[2][0][1][0] == "test.txt"
+        assert result[2][0][1][1] == b"content"
 
 
 class TestSerializeFormData:
@@ -575,3 +654,114 @@ class TestRemoveSuffix:
     def test_remove_suffix_empty(self) -> None:
         """Test removing empty suffix."""
         assert utils.remove_suffix("test_string", "") == "test_string"
+
+
+class TestSecurityClientSend:
+    """Tests for SecurityClient.send."""
+
+    def test_send_with_query_params_and_headers(self) -> None:
+        """Test sending request with query parameters and headers."""
+        client = utils.SecurityClient(
+            query_params={"key": "value"},
+            headers={"X-Test": "test"},
+        )
+        request = httpx.Request("GET", "https://example.com")
+        response = client.send(request)
+        assert "key=value" in str(response.request.url)
+        assert response.request.headers["X-Test"] == "test"
+
+
+class TestGetQueryParamHandler:
+    """Tests for get_query_param_handler."""
+
+    def test_get_query_param_handler_form(self) -> None:
+        """Test getting query param handler for form."""
+        handler = utils.get_query_param_handler("form")
+        assert isinstance(handler, utils.FormQueryParamHandler)
+
+    def test_get_query_param_handler_deep_object(self) -> None:
+        """Test getting query param handler for deep object."""
+        handler = utils.get_query_param_handler("deepObject")
+        assert isinstance(handler, utils.DeepObjectQueryParamHandler)
+
+    def test_get_query_param_handler_pipe_delimited(self) -> None:
+        """Test getting query param handler for pipe delimited."""
+        handler = utils.get_query_param_handler("pipeDelimited")
+        assert isinstance(handler, utils.PipeDelimitedQueryParamHandler)
+
+
+class File(msgspec.Struct):
+    """File struct for testing serialize_multipart_form."""
+
+    filename: Annotated[
+        str,
+        msgspec.Meta(extra={"multipart_form": {"field_name": "filename"}}),
+    ]
+    content: Annotated[
+        bytes,
+        msgspec.Meta(
+            extra={
+                "multipart_form": {"field_name": "content", "content": True},
+            },
+        ),
+    ]
+
+
+class TestSerializeMultipartForm:
+    """Tests for serialize_multipart_form."""
+
+    def test_serialize_multipart_form(self) -> None:
+        """Test serializing multipart form data."""
+
+        class MultipartRequest(msgspec.Struct):
+            file: Annotated[
+                File,
+                msgspec.Meta(extra={"multipart_form": {"file": True}}),
+            ]
+
+        request = MultipartRequest(
+            file=File(filename="test.txt", content=b"file content"),
+        )
+
+        media_type, _, form = utils.serialize_multipart_form(
+            "multipart/form-data",
+            request,
+        )
+        assert media_type == "multipart/form-data"
+        assert len(form) == 1
+        assert form[0][0] == "file"
+        assert form[0][1][0] == "test.txt"
+        assert form[0][1][1] == b"file content"
+
+
+class TestMultipartFormSerializer:
+    """Tests for MultipartFormSerializer."""
+
+    def test_serialize_file_field(self) -> None:
+        """Test serializing file field."""
+        serializer = utils.MultipartFormSerializer()
+        field = utils.MultipartFormField(
+            name="file",
+            value=File(filename="test.txt", content=b"file content"),
+            metadata={"file": True},
+        )
+        result = serializer._get_serializer(field).serialize(field)
+        assert result == [["file", ["test.txt", b"file content"]]]
+
+    def test_serialize_json_field(self) -> None:
+        """Test serializing JSON field."""
+        serializer = utils.MultipartFormSerializer()
+        field = utils.MultipartFormField(
+            name="json_data",
+            value={"key": "value"},
+            metadata={"json": True},
+        )
+        result = serializer._get_serializer(field).serialize(field)
+        assert result == [["json_data", [None, '{"key":"value"}', "application/json"]]]
+
+    def test_serialize_regular_field(self) -> None:
+        """Test serializing regular field."""
+        serializer = utils.MultipartFormSerializer()
+        field = utils.MultipartFormField(name="text", value="content", metadata={})
+        result = serializer._get_serializer(field).serialize(field)
+        assert result == [["text", [None, "content"]]]
