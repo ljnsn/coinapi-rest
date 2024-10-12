@@ -848,7 +848,7 @@ class FormDataSerializer(metaclass=abc.ABCMeta):
 class StructFormDataSerializer(FormDataSerializer):
     """Serializer for Struct form data."""
 
-    def serialize(self, field_name: str, data: msgspec.Struct) -> dict[str, list[str]]:
+    def serialize(self, _field_name: str, data: msgspec.Struct) -> dict[str, list[str]]:
         """Serialize Struct form data."""
         form: dict[str, list[str]] = {}
         for field in msgspec.structs.fields(data):
