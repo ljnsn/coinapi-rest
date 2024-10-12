@@ -7,7 +7,7 @@ from coinapi import CoinAPI
 from coinapi.models import operations
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_metrics."""
     response = coinapi.metrics.get_v1_metrics_listing()
@@ -17,7 +17,7 @@ def test_get_v1_metrics(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics_exchange(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_metrics_exchange_listing."""
     response = coinapi.metrics.get_v1_metrics_exchange_listing(exchange_id="KRAKEN")
@@ -28,7 +28,7 @@ def test_get_v1_metrics_exchange(coinapi: CoinAPI, snapshot: SnapshotAssertion) 
 
 
 @pytest.mark.skip(reason="Returns 500")
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics_exchange_current(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -45,7 +45,7 @@ def test_get_v1_metrics_exchange_current(
 
 
 @pytest.mark.skip(reason="What's a valid metric for an exchange?")
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics_exchange_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -62,7 +62,7 @@ def test_get_v1_metrics_exchange_history(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics_symbol_listing(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -75,7 +75,7 @@ def test_get_v1_metrics_symbol_listing(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_metrics_asset_listing(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,

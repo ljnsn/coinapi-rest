@@ -6,7 +6,7 @@ from syrupy.assertion import SnapshotAssertion
 from coinapi import CoinAPI
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_assets(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_assets."""
     res = coinapi.metadata.get_v1_assets(filter_asset_id="BTC,XMR")
@@ -15,7 +15,7 @@ def test_get_v1_assets(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     assert res.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_asset_id(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_exchanges."""
     res = coinapi.metadata.get_v1_assets_asset_id("BTC")
@@ -24,7 +24,7 @@ def test_get_v1_asset_id(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     assert res.content == snapshot
 
 
-@pytest.mark.network()
+@pytest.mark.network
 def test_get_v1_assets_icons(coinapi: CoinAPI) -> None:
     """Test get_v1_asset_icons."""
     # we don't want to store the whole response in the repo, so we don't use vcr here
@@ -33,7 +33,7 @@ def test_get_v1_assets_icons(coinapi: CoinAPI) -> None:
     assert res.content is not None
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_exchanges(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_exchanges."""
     res = coinapi.metadata.get_v1_exchanges("KRAKEN,BINANCE")
@@ -42,7 +42,7 @@ def test_get_v1_exchanges(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None
     assert res.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_exchange_id(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_exchange_id."""
     res = coinapi.metadata.get_v1_exchanges_exchange_id("KRAKEN")
@@ -51,7 +51,7 @@ def test_get_v1_exchange_id(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> No
     assert res.content == snapshot
 
 
-@pytest.mark.network()
+@pytest.mark.network
 def test_get_v1_exchange_icons(coinapi: CoinAPI) -> None:
     """Test get_v1_exchange_icons."""
     # we don't want to store the whole response in the repo, so we don't use vcr here
@@ -68,7 +68,7 @@ def test_get_v1_metadata(coinapi: CoinAPI) -> None:
     assert res.content is not None
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_symbols(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_symbols."""
     res = coinapi.metadata.get_v1_symbols(filter_asset_id="XMR")
@@ -77,7 +77,7 @@ def test_get_v1_symbols(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     assert res.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_symbols_map(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_symbols_map."""
     res = coinapi.metadata.get_v1_symbols_map_exchange_id("KRAKEN")
@@ -86,7 +86,7 @@ def test_get_v1_symbols_map(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> No
     assert res.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_symbols_exchange_id(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,

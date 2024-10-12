@@ -64,7 +64,7 @@ class Indexes(Base):
             accept_header_override,
         )
 
-    def get_v1_indexes_index_id_history(  # noqa: PLR0913
+    def get_v1_indexes_index_id_history(
         self,
         index_id: str,
         time_start: datetime | None = None,
@@ -85,7 +85,7 @@ class Indexes(Base):
             accept_header_override,
         )
 
-    def get_v1_indexes_index_id_timeseries(  # noqa: PLR0913
+    def get_v1_indexes_index_id_timeseries(
         self,
         index_id: str,
         time_start: datetime | None = None,

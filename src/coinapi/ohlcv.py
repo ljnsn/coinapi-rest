@@ -74,7 +74,7 @@ class Ohlcv(Base):
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_ohlcv_exchanges_exchange_id_history(  # noqa: PLR0913
+    def get_v1_ohlcv_exchanges_exchange_id_history(
         self,
         exchange_id: str,
         period_id: str,
@@ -104,7 +104,7 @@ class Ohlcv(Base):
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_ohlcv_symbol_id_latest(  # noqa: PLR0913
+    def get_v1_ohlcv_symbol_id_latest(
         self,
         symbol_id: str,
         period_id: str | None = None,

@@ -307,7 +307,7 @@ class CoinAPI:
 
     sdk_configuration: CoinAPIConfig
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         api_key: str | Callable[[], str],
         server_idx: int | None = None,

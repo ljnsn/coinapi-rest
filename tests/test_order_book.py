@@ -8,7 +8,7 @@ from coinapi.models import operations
 
 
 @pytest.mark.skip(reason="Can't find a symbol that has order book data..")
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_orderbooks_symbol_id_depth_current(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -24,7 +24,7 @@ def test_get_v1_orderbooks_symbol_id_depth_current(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_orderbooks_symbol_id_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -45,7 +45,7 @@ def test_get_v1_orderbooks_symbol_id_history(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_orderbooks_symbol_id_current(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -61,7 +61,7 @@ def test_get_v1_orderbooks_symbol_id_current(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_orderbooks_symbol_id_latest(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
