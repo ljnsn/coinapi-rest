@@ -80,6 +80,8 @@ class TestConfigureSecurityClient:
                     },
                 ),
             ]
+            field_with_no_meta: str = "test"
+            none_field: str | None = None
 
         security = Security(api_key="test_key")
         client = utils.configure_security_client(None, security)
@@ -142,6 +144,41 @@ class TestConfigureSecurityClient:
         security = Security(bearer_token="test_token")  # noqa: S106
         client = utils.configure_security_client(None, security)
         assert client.headers == {"Authorization": "Bearer test_token"}
+
+    def test_configure_security_client_with_option(self) -> None:
+        """Test configuring security client with security option."""
+
+        class SecurityOption(msgspec.Struct):
+            api_key: Annotated[
+                str,
+                msgspec.Meta(
+                    extra={
+                        "security": {
+                            "scheme": True,
+                            "type": "apiKey",
+                            "sub_type": "header",
+                            "field_name": "X-API-Key",
+                        },
+                    },
+                ),
+            ]
+            other_field: str = "test"
+
+        class Security(msgspec.Struct):
+            option: Annotated[
+                SecurityOption,
+                msgspec.Meta(
+                    extra={
+                        "security": {
+                            "option": True,
+                        },
+                    },
+                ),
+            ]
+
+        security = Security(option=SecurityOption(api_key="test_option_key"))
+        client = utils.configure_security_client(None, security)
+        assert client.headers == {"X-API-Key": "test_option_key"}
 
 
 class TestPathParamHandlers:
