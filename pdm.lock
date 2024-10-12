@@ -3,7 +3,7 @@
 
 [metadata]
 groups = ["default", "dev", "lint", "test"]
-strategy = ["cross_platform", "inherit_metadata"]
+strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
 content_hash = "sha256:6ce46b0cda9af557593207d17bf756efa302042bf07a789a741d091aa7e8def1"
 
@@ -270,7 +270,7 @@ files = [
 
 [[package]]
 name = "cz-conventional-gitmoji"
-version = "0.5.1"
+version = "0.5.2"
 requires_python = ">=3.8"
 summary = "A commitizen plugin that combines gitmoji and conventional."
 groups = ["dev"]
@@ -279,8 +279,8 @@ dependencies = [
     "commitizen>=3.9.1",
 ]
 files = [
-    {file = "cz_conventional_gitmoji-0.5.1-py3-none-any.whl", hash = "sha256:075a745ea54e83fd82f76b878b59fe34891d41e7a2bdb0fd1e3ec9f3027809a9"},
-    {file = "cz_conventional_gitmoji-0.5.1.tar.gz", hash = "sha256:44b66181321d0c077fa6c0772bb36cfc251d3848afa9d2c7c5301a22b65c42a0"},
+    {file = "cz_conventional_gitmoji-0.5.2-py3-none-any.whl", hash = "sha256:3e65ee88edc5cd681bc2611e586253ee4e8630e198a52d828c56d204c8c78efa"},
+    {file = "cz_conventional_gitmoji-0.5.2.tar.gz", hash = "sha256:25d6c3b8793d38002c5574eb2cf1754c60f9e0334e6b9d543b5c0b5c936fe685"},
 ]
 
 [[package]]
