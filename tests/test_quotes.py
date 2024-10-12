@@ -6,7 +6,7 @@ from syrupy.assertion import SnapshotAssertion
 from coinapi import CoinAPI
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_quotes_symbol_id_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -24,7 +24,7 @@ def test_get_v1_quotes_symbol_id_history(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_quotes_current(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -39,7 +39,7 @@ def test_get_v1_quotes_current(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_quotes_symbol_id_current(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -54,7 +54,7 @@ def test_get_v1_quotes_symbol_id_current(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_quotes_latest(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -70,7 +70,7 @@ def test_get_v1_quotes_latest(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_quotes_symbol_id_latest(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,

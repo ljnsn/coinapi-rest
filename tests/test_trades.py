@@ -7,7 +7,7 @@ from coinapi import CoinAPI
 from coinapi.models import operations
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_trades_symbol_id_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -28,7 +28,7 @@ def test_get_v1_trades_symbol_id_history(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_trades_symbol_id_latest(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -44,7 +44,7 @@ def test_get_v1_trades_symbol_id_latest(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_trades_latest(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,

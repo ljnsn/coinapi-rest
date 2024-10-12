@@ -170,7 +170,7 @@ class Metrics(Base):
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_metrics_asset_current(  # noqa: PLR0913
+    def get_v1_metrics_asset_current(
         self,
         metric_id: str | None = None,
         asset_id: str | None = None,

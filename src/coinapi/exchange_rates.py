@@ -50,7 +50,7 @@ class ExchangeRates(Base):
             accept_header_override=accept_header_override,
         )
 
-    def get_v1_base_rates(  # noqa: PLR0913
+    def get_v1_base_rates(
         self,
         asset_id_base: str,
         filter_asset_id: str | None = None,

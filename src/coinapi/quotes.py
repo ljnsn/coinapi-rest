@@ -7,7 +7,7 @@ from coinapi.models import operations
 class Quotes(Base):
     r"""Controller for retrieving quotes data, also known as quotes or passive level 1 data."""
 
-    def get_v1_quotes_symbol_id_history(  # noqa: PLR0913
+    def get_v1_quotes_symbol_id_history(
         self,
         symbol_id: str,
         time_start: str | None = None,

@@ -7,7 +7,7 @@ from coinapi import CoinAPI
 from coinapi.models import operations
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_specific_rate(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_specific_rate."""
     response = coinapi.exchange_rates.get_v1_specific_rate(
@@ -21,7 +21,7 @@ def test_get_v1_specific_rate(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> 
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_base_rates(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -36,7 +36,7 @@ def test_get_v1_base_rates(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_history_periods(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
@@ -49,7 +49,7 @@ def test_get_v1_history_periods(
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_pair_history(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,

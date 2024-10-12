@@ -33,14 +33,14 @@ def _session_start() -> None:
     vcr_log.setLevel(logging.WARNING)
 
 
-@pytest.fixture()
+@pytest.fixture
 def api_key() -> str:
     """Load the API key from the environment."""
     load_dotenv()
     return os.environ.get("COINAPI_KEY", "testing")
 
 
-@pytest.fixture()
+@pytest.fixture
 def coinapi(api_key: str) -> CoinAPI:
     """Return a CoinAPI instance."""
     return CoinAPI(api_key)
@@ -75,7 +75,7 @@ def vcr_config(record_mode: str) -> dict[str, Any]:
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def snapshot_json(snapshot: SnapshotAssertion) -> SnapshotAssertion:
     """Return a snapshot instance for JSON."""
     return snapshot.with_defaults(extension_class=JSONSnapshotExtension)

@@ -7,7 +7,7 @@ from coinapi import CoinAPI
 from coinapi.models import components, operations
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_indexes(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_indexes_listing."""
     response = coinapi.indexes.get_v1_indexes()
@@ -29,7 +29,7 @@ def test_post_v1_indexes(coinapi: CoinAPI) -> None:
     assert response.status_code == 201
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_indexes_index_id(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test get_v1_indexes_index_id."""
     response = coinapi.indexes.get_v1_indexes_index_id("TEST_IDX14_VWAP")
@@ -64,7 +64,7 @@ def test_put_v1_indexes(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     assert response.content == snapshot
 
 
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_indexes_history(coinapi: CoinAPI, snapshot: SnapshotAssertion) -> None:
     """Test retrieving historical index value and composition."""
     response = coinapi.indexes.get_v1_indexes_index_id_history("TEST_IDX14_VWAP")
@@ -75,7 +75,7 @@ def test_get_v1_indexes_history(coinapi: CoinAPI, snapshot: SnapshotAssertion) -
 
 
 @pytest.mark.skip(reason="Alpha release..")
-@pytest.mark.vcr()
+@pytest.mark.vcr
 def test_get_v1_indexes_index_id_timeseries(
     coinapi: CoinAPI,
     snapshot: SnapshotAssertion,
