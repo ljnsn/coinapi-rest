@@ -97,7 +97,7 @@ jobs:
           cat << EOF > sonar-project.properties
           sonar.projectKey=ljnsn_coinapi-rest
           sonar.organization=ljnsn
-          sonar.python.version=">=3.10"
+          sonar.python.version=3.10
           sonar.python.coverage.reportPaths=reports/coverage.xml
           sonar.sources=src/
           sonar.tests=tests/
