@@ -1,6 +1,6 @@
 [project]
 name = "coinapi-rest"
-version = "0.0.4"
+version = "0.0.5"
 description = "CoinAPI Python REST Client"
 authors = [{ name = "ljnsn", email = "info@ljnsn.com" }]
 dependencies = [

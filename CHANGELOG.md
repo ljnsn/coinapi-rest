@@ -1,3 +1,18 @@
+## v0.0.5 (2024-10-12)
+
+### 🐛🚑️ Fixes
+
+- sonar issues (#21)
+
+### 💚👷 CI & Build
+
+- generate sonar properties dynamically (#20)
+- sonarqube (#19)
+
+### 🔧🔨📦️ Configuration, Scripts, Packages
+
+- meta (#16)
+
 ## v0.0.4 (2024-03-07)
 
 ### ♻️  Refactorings
