@@ -7,18 +7,13 @@ on:
 
 jobs:
   python-lint:
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-        platform: [ubuntu-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
       - uses: actions/cache@v4
         id: cache
         with:
@@ -33,6 +28,11 @@ jobs:
         run: python -m pdm install -G lint -G dev
       - name: Lint
         run: python -m pdm run lint
+      - name: Archive lint reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports
+          path: reports
 
   python-test:
     strategy:
