@@ -104,7 +104,6 @@ jobs:
         with:
           path: reports
           pattern: coverage-*
-          merge-multiple: true
       - name: Combine coverage
         run: |
           ls -al reports
