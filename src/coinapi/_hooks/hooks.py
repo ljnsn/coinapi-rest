@@ -24,9 +24,6 @@ class SDKHooks(Hooks):
     after_success_hooks: ClassVar[list[AfterSuccessHook]] = []
     after_error_hooks: ClassVar[list[AfterErrorHook]] = []
 
-    def __init__(self) -> None:
-        pass
-
     def register_sdk_init_hook(self, hook: SDKInitHook) -> None:
         """Register an SDK init hook."""
         self.sdk_init_hooks.append(hook)

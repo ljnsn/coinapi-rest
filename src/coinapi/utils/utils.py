@@ -1,5 +1,6 @@
 """Utilities."""
 
+import abc
 import base64
 import datetime as dt
 import re
@@ -8,8 +9,9 @@ from decimal import Decimal
 from email.message import Message
 from enum import Enum
 from typing import (
+    Annotated,
     Any,
-    ClassVar,
+    Protocol,
     Union,
     cast,
     get_args,
@@ -19,18 +21,25 @@ from xmlrpc.client import boolean
 
 import httpx
 import msgspec
+from mypy_extensions import NamedArg
 from typing_inspect import is_optional_type
+
+NOT_SUPPORTED = "not supported"
 
 
 class SecurityClient:
     """Client with security settings."""
 
-    client: httpx.Client | None
-    query_params: ClassVar[dict[str, str]] = {}
-    headers: ClassVar[dict[str, str]] = {}
-
-    def __init__(self, client: httpx.Client | None = None, timeout: int = 60) -> None:
+    def __init__(
+        self,
+        client: httpx.Client | None = None,
+        query_params: dict[str, str] | None = None,
+        headers: dict[str, str] | None = None,
+        timeout: int = 60,
+    ) -> None:
         self.client = client
+        self.query_params = query_params or {}
+        self.headers = headers or {}
         self.timeout = timeout
         self.limits = httpx.Limits(max_keepalive_connections=1, max_connections=1)
 
@@ -143,7 +152,7 @@ def _parse_security_scheme_value(
         elif sub_type == "query":
             client.query_params[header_name] = value
         else:
-            raise ValueError("not supported")
+            raise ValueError(NOT_SUPPORTED)
     elif scheme_type == "openIdConnect":
         client.headers[header_name] = _apply_bearer(value)
     elif scheme_type == "oauth2":
@@ -153,9 +162,9 @@ def _parse_security_scheme_value(
         if sub_type == "bearer":
             client.headers[header_name] = _apply_bearer(value)
         else:
-            raise ValueError("not supported")
+            raise ValueError(NOT_SUPPORTED)
     else:
-        raise ValueError("not supported")
+        raise ValueError(NOT_SUPPORTED)
 
 
 def _apply_bearer(token: str) -> str:
@@ -195,8 +204,129 @@ def get_metadata(field_info: msgspec.structs.FieldInfo) -> dict[str, Any]:
     return {}
 
 
-def generate_url(  # noqa: PLR0912, C901
-    clazz: msgspec.Struct,
+class PathParamHandler(Protocol):
+    """Protocol for path parameter handlers."""
+
+    def handle(self, param: Any, metadata: dict[str, Any]) -> str:
+        """Handle a path parameter."""
+        ...
+
+
+class ListParamHandler:
+    """Handler for list parameters."""
+
+    def handle(self, param: list[Any], _metadata: dict[str, Any]) -> str:
+        """Handle a list parameter."""
+        pp_vals = [_val_to_string(pp_val) for pp_val in param if pp_val is not None]
+        return ",".join(pp_vals)
+
+
+class DictParamHandler:
+    """Handler for dictionary parameters."""
+
+    def handle(self, param: dict[str, Any], metadata: dict[str, Any]) -> str:
+        """Handle a dictionary parameter."""
+        pp_vals = []
+        for pp_key, pp_value in param.items():
+            if pp_value is None:
+                continue
+            if metadata.get("explode"):
+                pp_vals.append(f"{pp_key}={_val_to_string(pp_value)}")
+            else:
+                pp_vals.append(f"{pp_key},{_val_to_string(pp_value)}")
+        return ",".join(pp_vals)
+
+
+class StructParamHandler:
+    """Handler for msgspec.Struct parameters."""
+
+    def handle(self, param: msgspec.Struct, metadata: dict[str, Any]) -> str:
+        """Handle a msgspec.Struct parameter."""
+        pp_vals = []
+        param_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(
+            param,
+        )
+        for param_field in param_fields:
+            param_value_metadata = get_metadata(param_field).get("path_param")
+            if not param_value_metadata:
+                continue
+
+            parm_name = param_value_metadata.get("field_name", param_field.name)
+            param_field_val = getattr(param, param_field.name)
+            if param_field_val is None:
+                continue
+            if metadata.get("explode"):
+                pp_vals.append(f"{parm_name}={_val_to_string(param_field_val)}")
+            else:
+                pp_vals.append(f"{parm_name},{_val_to_string(param_field_val)}")
+        return ",".join(pp_vals)
+
+
+class DefaultParamHandler:
+    """Handler for default parameter types."""
+
+    def handle(
+        self,
+        param: str | complex | bool | Decimal,
+        _metadata: dict[str, Any],
+    ) -> str:
+        """Handle a default parameter type."""
+        return _val_to_string(param)
+
+
+def get_param_handler(param: Any) -> PathParamHandler:
+    """Get the appropriate parameter handler based on the parameter type."""
+    if isinstance(param, list):
+        return ListParamHandler()
+    if isinstance(param, dict):
+        return DictParamHandler()
+    if isinstance(param, msgspec.Struct):
+        return StructParamHandler()
+    return DefaultParamHandler()
+
+
+def handle_single_path_param(param: Any, metadata: dict[str, Any]) -> str:
+    """Handle a single path parameter."""
+    handler = get_param_handler(param)
+    return handler.handle(param, metadata)
+
+
+def serialize_param(
+    param: Any,
+    metadata: dict[str, Any],
+    field_type: type[Any],
+    field_name: str,
+) -> dict[str, str]:
+    """Serialize a parameter based on metadata."""
+    params: dict[str, str] = {}
+    serialization = metadata.get("serialization", "")
+    if serialization == "json":
+        params[metadata.get("field_name", field_name)] = marshal_json(param, field_type)
+    return params
+
+
+def replace_url_placeholder(path: str, field_name: str, value: str) -> str:
+    """Replace a placeholder in the URL path."""
+    return path.replace("{" + field_name + "}", value, 1)
+
+
+def is_path_param(field: msgspec.structs.FieldInfo) -> bool:
+    """Check if a field is a path parameter."""
+    return get_metadata(field).get("path_param") is not None
+
+
+def get_param_value(
+    field: msgspec.structs.FieldInfo,
+    path_params: msgspec.Struct | None,
+    gbls: dict[str, dict[str, dict[str, Any]]] | None,
+) -> Any:
+    """Get the parameter value from path_params or globals."""
+    param = getattr(path_params, field.name) if path_params is not None else None
+    return _populate_from_globals(field.name, param, "pathParam", gbls)
+
+
+def generate_url(
+    clazz: type[msgspec.Struct],
     server_url: str,
     path: str,
     path_params: msgspec.Struct | None,
@@ -207,94 +337,24 @@ def generate_url(  # noqa: PLR0912, C901
         clazz,
     )
     for field in path_param_fields:
-        request_metadata = get_metadata(field).get("request")
-        if request_metadata is not None:
+        if not is_path_param(field):
             continue
 
-        param_metadata = get_metadata(field).get("path_param")
-        if param_metadata is None:
-            continue
-
-        param = getattr(path_params, field.name) if path_params is not None else None
-        param = _populate_from_globals(field.name, param, "pathParam", gbls)
-
+        param = get_param_value(field, path_params, gbls)
         if param is None:
             continue
 
-        f_name = param_metadata.get("field_name", field.name)
-        serialization = param_metadata.get("serialization", "")
-        if serialization != "":
-            serialized_params = _get_serialized_params(
-                param_metadata,
-                field.type,
-                f_name,
-                param,
-            )
+        metadata = get_metadata(field).get("path_param", {})
+        f_name = metadata.get("field_name", field.name)
+        serialization = metadata.get("serialization", "")
+
+        if serialization:
+            serialized_params = serialize_param(param, metadata, field.type, f_name)
             for key, value in serialized_params.items():
-                path = path.replace("{" + key + "}", value, 1)
-        elif param_metadata.get("style", "simple") == "simple":
-            if isinstance(param, list):
-                pp_vals: list[str] = []
-                for pp_val in param:
-                    if pp_val is None:
-                        continue
-                    pp_vals.append(_val_to_string(pp_val))
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            elif isinstance(param, dict):
-                pp_vals = []
-                for pp_key in param:
-                    if param[pp_key] is None:
-                        continue
-                    if param_metadata.get("explode"):
-                        pp_vals.append(f"{pp_key}={_val_to_string(param[pp_key])}")
-                    else:
-                        pp_vals.append(f"{pp_key},{_val_to_string(param[pp_key])}")
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            elif not isinstance(param, str | int | float | complex | bool | Decimal):
-                pp_vals = []
-                param_fields: tuple[
-                    msgspec.structs.FieldInfo,
-                    ...,
-                ] = msgspec.structs.fields(param)
-                for param_field in param_fields:
-                    param_value_metadata = get_metadata(param_field).get(
-                        "path_param",
-                    )
-                    if not param_value_metadata:
-                        continue
-
-                    parm_name = param_value_metadata.get("field_name", field.name)
-
-                    param_field_val = getattr(param, param_field.name)
-                    if param_field_val is None:
-                        continue
-                    if param_metadata.get("explode"):
-                        pp_vals.append(
-                            f"{parm_name}={_val_to_string(param_field_val)}",
-                        )
-                    else:
-                        pp_vals.append(
-                            f"{parm_name},{_val_to_string(param_field_val)}",
-                        )
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            else:
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    _val_to_string(param),
-                    1,
-                )
+                path = replace_url_placeholder(path, key, value)
+        elif metadata.get("style", "simple") == "simple":
+            serialized_value = handle_single_path_param(param, metadata)
+            path = replace_url_placeholder(path, f_name, serialized_value)
 
     return remove_suffix(server_url, "/") + path
 
@@ -312,62 +372,115 @@ def template_url(url_with_params: str, params: dict[str, str]) -> str:
     return url_with_params
 
 
+class QueryParamHandler(Protocol):
+    """Protocol for query parameter handlers."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Handle query parameter processing."""
+        ...
+
+
+class FormQueryParamHandler:
+    """Handler for form style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process form style query parameters."""
+        return _get_delimited_query_params(metadata, field_name, value, ",")
+
+
+class DeepObjectQueryParamHandler:
+    """Handler for deepObject style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process deepObject style query parameters."""
+        return _get_deep_object_query_params(metadata, field_name, value)
+
+
+class PipeDelimitedQueryParamHandler:
+    """Handler for pipeDelimited style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process pipeDelimited style query parameters."""
+        return _get_delimited_query_params(metadata, field_name, value, "|")
+
+
+def get_query_param_handler(style: str) -> QueryParamHandler:
+    """Get the appropriate query parameter handler based on style."""
+    handlers = {
+        "form": FormQueryParamHandler(),
+        "deepObject": DeepObjectQueryParamHandler(),
+        "pipeDelimited": PipeDelimitedQueryParamHandler(),
+    }
+    # Default to form style
+    return handlers.get(style, FormQueryParamHandler())  # type: ignore[return-value]
+
+
+def process_query_param(
+    field: msgspec.structs.FieldInfo,
+    value: Any,
+    _gbls: dict[str, dict[str, dict[str, Any]]] | None,
+) -> dict[str, list[str]]:
+    """Process a single query parameter."""
+    metadata = get_metadata(field).get("query_param", {})
+    field_name = metadata.get("field_name", field.name)
+
+    if metadata.get("serialization"):
+        serialized_params = _get_serialized_params(
+            metadata,
+            field.type,
+            field_name,
+            value,
+        )
+        return {key: [value] for key, value in serialized_params.items()}
+
+    style = metadata.get("style", "form")
+    handler = get_query_param_handler(style)
+    return handler.handle(metadata, field_name, value)
+
+
 def get_query_params(
-    clazz: msgspec.Struct,
+    clazz: type[msgspec.Struct],
     query_params: msgspec.Struct,
     gbls: dict[str, dict[str, dict[str, Any]]] | None = None,
 ) -> dict[str, list[str]]:
-    """Get query parameters."""
+    """Get query parameters for a request."""
     params: dict[str, list[str]] = {}
 
-    param_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(clazz)
-    for field in param_fields:
-        request_metadata = get_metadata(field).get("request")
-        if request_metadata is not None:
+    for field in msgspec.structs.fields(clazz):
+        if get_metadata(field).get("request") is not None:
             continue
 
-        metadata = get_metadata(field).get("query_param")
-        if not metadata:
+        if not get_metadata(field).get("query_param"):
             continue
 
-        param_name = field.name
-        value = getattr(query_params, param_name) if query_params is not None else None
+        value = getattr(query_params, field.name) if query_params is not None else None
+        value = _populate_from_globals(field.name, value, "queryParam", gbls)
 
-        value = _populate_from_globals(param_name, value, "queryParam", gbls)
+        if value is None:
+            continue
 
-        f_name = metadata.get("field_name")
-        serialization = metadata.get("serialization", "")
-        if serialization != "":
-            serialized_parms = _get_serialized_params(
-                metadata,
-                field.type,
-                f_name,
-                value,
-            )
-            for key, value in serialized_parms.items():
-                if key in params:
-                    params[key].extend(value)
-                else:
-                    params[key] = [value]
-        else:
-            style = metadata.get("style", "form")
-            if style == "deepObject":
-                params = {
-                    **params,
-                    **_get_deep_object_query_params(metadata, f_name, value),
-                }
-            elif style == "form":
-                params = {
-                    **params,
-                    **_get_delimited_query_params(metadata, f_name, value, ","),
-                }
-            elif style == "pipeDelimited":
-                params = {
-                    **params,
-                    **_get_delimited_query_params(metadata, f_name, value, "|"),
-                }
-            else:
-                raise NotImplementedError("not yet implemented")
+        params.update(process_query_param(field, value, gbls))
+
     return params
 
 
@@ -387,8 +500,8 @@ def get_headers(headers_params: msgspec.Struct | None) -> dict[str, str]:
             continue
 
         value = _serialize_header(
-            metadata.get("explode", False),
             getattr(headers_params, field.name),
+            explode=metadata.get("explode", False),
         )
 
         if value != "":
@@ -413,18 +526,29 @@ def _get_serialized_params(
     return params
 
 
-def _get_deep_object_query_params(  # noqa: PLR0912, C901
-    metadata: dict[str, Any],
-    field_name: str,
-    obj: Any,
-) -> dict[str, list[str]]:
-    """Get deep object query parameters."""
-    params: dict[str, list[str]] = {}
+class DeepObjectQueryParamProcessor:
+    """Processor for deep object query parameters."""
 
-    if obj is None:
-        return params
+    def __init__(self, metadata: dict[str, Any], field_name: str) -> None:
+        """Initialize the processor."""
+        self.metadata = metadata
+        self.field_name = field_name
+        self.params: dict[str, list[str]] = {}
 
-    if isinstance(obj, msgspec.Struct):
+    def process(self, obj: Any) -> dict[str, list[str]]:
+        """Process the input object."""
+        if obj is None:
+            return self.params
+        if isinstance(obj, msgspec.Struct):
+            self._process_struct(obj)
+        elif isinstance(obj, dict):
+            self._process_dict(obj)
+        elif isinstance(obj, list):
+            self._process_list(obj)
+        return self.params
+
+    def _process_struct(self, obj: msgspec.Struct) -> None:
+        """Process a msgspec.Struct object."""
         obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
         for obj_field in obj_fields:
             obj_param_metadata = get_metadata(obj_field).get("query_param")
@@ -435,52 +559,44 @@ def _get_deep_object_query_params(  # noqa: PLR0912, C901
             if obj_val is None:
                 continue
 
-            if isinstance(obj_val, list):
-                for val in obj_val:
-                    if val is None:
-                        continue
+            param_name = f'{self.metadata.get("field_name", self.field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
+            self._add_param(param_name, obj_val)
 
-                    if (
-                        params.get(
-                            f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]',
-                        )
-                        is None
-                    ):
-                        params[
-                            f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                        ] = []
-
-                    params[
-                        f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                    ].append(_val_to_string(val))
-            else:
-                params[
-                    f'{metadata.get("field_name", field_name)}[{obj_param_metadata.get("field_name", obj_field.name)}]'
-                ] = [_val_to_string(obj_val)]
-    elif isinstance(obj, dict):
+    def _process_dict(self, obj: dict[str, Any]) -> None:
+        """Process a dictionary object."""
         for key, value in obj.items():
             if value is None:
                 continue
 
-            if isinstance(value, list):
-                for val in value:
-                    if val is None:
-                        continue
+            param_name = f'{self.metadata.get("field_name", self.field_name)}[{key}]'
+            self._add_param(param_name, value)
 
-                    if (
-                        params.get(f'{metadata.get("field_name", field_name)}[{key}]')
-                        is None
-                    ):
-                        params[f'{metadata.get("field_name", field_name)}[{key}]'] = []
+    def _process_list(self, obj: list[Any]) -> None:
+        """Process a list object."""
+        # This method is not used in the original implementation
+        # but added for completeness
+        raise NotImplementedError
 
-                    params[f'{metadata.get("field_name", field_name)}[{key}]'].append(
-                        _val_to_string(val),
-                    )
-            else:
-                params[f'{metadata.get("field_name", field_name)}[{key}]'] = [
-                    _val_to_string(value),
-                ]
-    return params
+    def _add_param(self, key: str, value: Any) -> None:
+        """Add a parameter to the result dictionary."""
+        if isinstance(value, list):
+            if key not in self.params:
+                self.params[key] = []
+            for val in value:
+                if val is not None:
+                    self.params[key].append(_val_to_string(val))
+        else:
+            self.params[key] = [_val_to_string(value)]
+
+
+def _get_deep_object_query_params(
+    metadata: dict[str, Any],
+    field_name: str,
+    obj: Any,
+) -> dict[str, list[str]]:
+    """Get deep object query parameters."""
+    processor = DeepObjectQueryParamProcessor(metadata, field_name)
+    return processor.process(obj)
 
 
 def _get_query_param_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
@@ -502,10 +618,10 @@ def _get_delimited_query_params(
     """Get delimited query parameters."""
     return _populate_form(
         field_name,
-        metadata.get("explode", True),
         obj,
         _get_query_param_field_name,
         delimiter,
+        explode=metadata.get("explode", True),
     )
 
 
@@ -529,6 +645,9 @@ def serialize_request_body(
         for field in msgspec.structs.fields(request)
         if field.name == request_field_name
     ).type
+
+    if get_origin(request_type) is Annotated:
+        request_type = get_args(request_type)[0]
 
     if request_val is None and is_optional_type(request_type):
         return None, None, None
@@ -577,62 +696,6 @@ def serialize_content_type(
     raise ValueError(msg)
 
 
-def serialize_multipart_form(  # noqa: PLR0912, C901
-    media_type: str,
-    request: msgspec.Struct,
-) -> tuple[str, Any, list[list[Any]]]:
-    """Serialize a multipart form."""
-    form: list[list[Any]] = []
-    request_fields = msgspec.structs.fields(request)
-
-    for field in request_fields:
-        val = getattr(request, field.name)
-        if val is None:
-            continue
-
-        field_metadata = get_metadata(field).get("multipart_form")
-        if not field_metadata:
-            continue
-
-        if field_metadata.get("file") is True:
-            file_fields = msgspec.structs.fields(val)
-
-            file_name = ""
-            field_name = ""
-            content = b""
-
-            for file_field in file_fields:
-                file_metadata = get_metadata(file_field).get("multipart_form")
-                if file_metadata is None:
-                    continue
-
-                if file_metadata.get("content") is True:
-                    content = getattr(val, file_field.name)
-                else:
-                    field_name = file_metadata.get("field_name", file_field.name)
-                    file_name = getattr(val, file_field.name)
-            if field_name == "" or file_name == "" or content == b"":
-                raise ValueError("invalid multipart/form-data file")
-
-            form.append([field_name, [file_name, content]])
-        elif field_metadata.get("json") is True:
-            to_append = [
-                field_metadata.get("field_name", field.name),
-                [None, marshal_json(val, field.type), "application/json"],
-            ]
-            form.append(to_append)
-        else:
-            field_name = field_metadata.get("field_name", field.name)
-            if isinstance(val, list):
-                for value in val:
-                    if value is None:
-                        continue
-                    form.append([field_name + "[]", [None, _val_to_string(value)]])
-            else:
-                form.append([field_name, [None, _val_to_string(val)]])
-    return media_type, None, form
-
-
 def serialize_dict(
     original: dict[str, Any],
     explode: bool,  # noqa: FBT001
@@ -659,11 +722,142 @@ def serialize_dict(
     return existing
 
 
-def serialize_form_data(field_name: str, data: Any) -> dict[str, Any]:
-    """Serialize form data."""
-    form: dict[str, list[str]] = {}
+class MultipartFormField:
+    """Represents a field in a multipart form."""
 
-    if isinstance(data, msgspec.Struct):
+    def __init__(self, name: str, value: Any, metadata: dict[str, Any]) -> None:
+        self.name = name
+        self.value = value
+        self.metadata = metadata
+
+
+class FieldSerializer(Protocol):
+    """Protocol for field serializers."""
+
+    def serialize(self, field: MultipartFormField) -> list[Any]:
+        """Serialize a field."""
+        ...
+
+
+class FileFieldSerializer:
+    """Serializer for file fields."""
+
+    def serialize(self, field: MultipartFormField) -> list[Any]:
+        """Serialize a file field."""
+        file_fields = msgspec.structs.fields(field.value)
+        file_name = ""
+        content = b""
+
+        for file_field in file_fields:
+            file_metadata = get_metadata(file_field).get("multipart_form")
+            if file_metadata is None:
+                continue
+
+            if file_metadata.get("content") is True:
+                content = getattr(field.value, file_field.name)
+            else:
+                file_name = getattr(field.value, file_field.name)
+
+        if not file_name or not content:
+            raise ValueError("Invalid multipart/form-data file")
+
+        return [[field.name, [file_name, content]]]
+
+
+class JsonFieldSerializer:
+    """Serializer for JSON fields."""
+
+    def serialize(self, field: MultipartFormField) -> list[Any]:
+        """Serialize a JSON field."""
+        return [
+            [
+                field.metadata.get("field_name", field.name),
+                [
+                    None,
+                    marshal_json(field.value, type(field.value)),
+                    "application/json",
+                ],
+            ],
+        ]
+
+
+class RegularFieldSerializer:
+    """Serializer for regular fields."""
+
+    def serialize(self, field: MultipartFormField) -> list[Any]:
+        """Serialize a regular field."""
+        field_name = field.metadata.get("field_name", field.name)
+        if isinstance(field.value, list):
+            return [
+                [f"{field_name}[]", [None, _val_to_string(value)]]
+                for value in field.value
+                if value is not None
+            ]
+        return [[field_name, [None, _val_to_string(field.value)]]]
+
+
+class MultipartFormSerializer:
+    """Serializes a multipart form."""
+
+    def __init__(self) -> None:
+        self.serializers: dict[str, FieldSerializer] = {
+            "file": FileFieldSerializer(),
+            "json": JsonFieldSerializer(),
+            "regular": RegularFieldSerializer(),
+        }
+
+    def serialize(self, request: msgspec.Struct) -> tuple[str, Any, list[list[Any]]]:
+        """Serialize the entire multipart form."""
+        form: list[list[Any]] = []
+        for field in self._get_fields(request):
+            serializer = self._get_serializer(field)
+            form.extend(serializer.serialize(field))
+        return "multipart/form-data", None, form
+
+    def _get_fields(self, request: msgspec.Struct) -> list[MultipartFormField]:
+        """Extract fields from the request."""
+        fields = []
+        for field in msgspec.structs.fields(request):
+            value = getattr(request, field.name)
+            if value is None:
+                continue
+            metadata = get_metadata(field).get("multipart_form", {})
+            if metadata:
+                fields.append(MultipartFormField(field.name, value, metadata))
+        return fields
+
+    def _get_serializer(self, field: MultipartFormField) -> FieldSerializer:
+        """Get the appropriate serializer for a field."""
+        if field.metadata.get("file") is True:
+            return self.serializers["file"]
+        if field.metadata.get("json") is True:
+            return self.serializers["json"]
+        return self.serializers["regular"]
+
+
+def serialize_multipart_form(
+    _media_type: str,
+    request: msgspec.Struct,
+) -> tuple[str, Any, list[list[Any]]]:
+    """Serialize a multipart form."""
+    serializer = MultipartFormSerializer()
+    return serializer.serialize(request)
+
+
+class FormDataSerializer(metaclass=abc.ABCMeta):
+    """Base class for form data serializers."""
+
+    @abc.abstractmethod
+    def serialize(self, field_name: str, data: Any) -> dict[str, list[str]]:
+        """Serialize form data."""
+
+
+class StructFormDataSerializer(FormDataSerializer):
+    """Serializer for Struct form data."""
+
+    def serialize(self, _field_name: str, data: msgspec.Struct) -> dict[str, list[str]]:
+        """Serialize Struct form data."""
+        form: dict[str, list[str]] = {}
         for field in msgspec.structs.fields(data):
             val = getattr(data, field.name)
             if val is None:
@@ -678,27 +872,51 @@ def serialize_form_data(field_name: str, data: Any) -> dict[str, Any]:
             if metadata.get("json"):
                 form[field_name] = [marshal_json(val, field.type)]
             elif metadata.get("style", "form") == "form":
-                form = {
-                    **form,
-                    **_populate_form(
+                form.update(
+                    _populate_form(
                         field_name,
-                        metadata.get("explode", True),
                         val,
                         _get_form_field_name,
                         ",",
+                        explode=metadata.get("explode", True),
                     ),
-                }
+                )
             else:
                 msg = f"Invalid form style for field {field.name}"
                 raise ValueError(msg)
-    elif isinstance(data, dict):
-        for key, value in data.items():
-            form[key] = [_val_to_string(value)]
-    else:
+        return form
+
+
+class DictFormDataSerializer(FormDataSerializer):
+    """Serializer for Dict form data."""
+
+    def serialize(self, _field_name: str, data: dict[str, Any]) -> dict[str, list[str]]:
+        """Serialize Dict form data."""
+        return {key: [_val_to_string(value)] for key, value in data.items()}
+
+
+class DefaultFormDataSerializer(FormDataSerializer):
+    """Serializer for default form data."""
+
+    def serialize(self, field_name: str, _data: Any) -> dict[str, list[str]]:
+        """Serialize default form data."""
         msg = f"Invalid request body type for field {field_name}"
         raise TypeError(msg)
 
-    return form
+
+def get_form_data_serializer(data: Any) -> FormDataSerializer:
+    """Get the appropriate form data serializer."""
+    if isinstance(data, msgspec.Struct):
+        return StructFormDataSerializer()
+    if isinstance(data, dict):
+        return DictFormDataSerializer()
+    return DefaultFormDataSerializer()
+
+
+def serialize_form_data(field_name: str, data: Any) -> dict[str, list[str]]:
+    """Serialize form data."""
+    serializer = get_form_data_serializer(data)
+    return serializer.serialize(field_name, data)
 
 
 def _get_form_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
@@ -711,20 +929,36 @@ def _get_form_field_name(obj_field: msgspec.structs.FieldInfo) -> str:
     return cast(str, obj_param_metadata.get("field_name", obj_field.name))
 
 
-def _populate_form(  # noqa: PLR0912, C901
-    field_name: str,
-    explode: bool,  # noqa: FBT001
-    obj: Any,
-    get_field_name_func: Callable[..., str],
-    delimiter: str,
-) -> dict[str, list[str]]:
-    """Populate a form."""
-    params: dict[str, list[str]] = {}
+class FormPopulator(metaclass=abc.ABCMeta):
+    """Abstract base class for form populators."""
 
-    if obj is None:
-        return params
+    @abc.abstractmethod
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data."""
 
-    if isinstance(obj, msgspec.Struct):
+
+class StructFormPopulator(FormPopulator):
+    """Populator for msgspec.Struct objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for Struct objects."""
+        params: dict[str, list[str]] = {}
         items = []
 
         obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
@@ -742,22 +976,57 @@ def _populate_form(  # noqa: PLR0912, C901
             else:
                 items.append(f"{obj_field_name}{delimiter}{_val_to_string(val)}")
 
-        if len(items) > 0:
+        if items:
             params[field_name] = [delimiter.join(items)]
-    elif isinstance(obj, dict):
+
+        return params
+
+
+class DictFormPopulator(FormPopulator):
+    """Populator for dictionary objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: dict[str, Any],
+        _get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for dictionary objects."""
+        params: dict[str, list[str]] = {}
         items = []
+
         for key, value in obj.items():
             if value is None:
                 continue
 
             if explode:
-                params[key] = _val_to_string(value)  # type: ignore[assignment]
+                params[key] = [_val_to_string(value)]
             else:
                 items.append(f"{key}{delimiter}{_val_to_string(value)}")
 
-        if len(items) > 0:
+        if items:
             params[field_name] = [delimiter.join(items)]
-    elif isinstance(obj, list):
+
+        return params
+
+
+class ListFormPopulator(FormPopulator):
+    """Populator for list objects."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: list[Any],
+        _get_field_name_func: Callable[..., str],
+        delimiter: str,
+        *,
+        explode: bool,
+    ) -> dict[str, list[str]]:
+        """Populate form data for list objects."""
+        params: dict[str, list[str]] = {}
         items = []
 
         for value in obj:
@@ -771,74 +1040,137 @@ def _populate_form(  # noqa: PLR0912, C901
             else:
                 items.append(_val_to_string(value))
 
-        if len(items) > 0:
-            params[field_name] = [delimiter.join([str(item) for item in items])]
-    else:
-        params[field_name] = [_val_to_string(obj)]
+        if items:
+            params[field_name] = [delimiter.join(items)]
 
-    return params
+        return params
 
 
-def _serialize_header(explode: bool, obj: Any) -> str:  # noqa: PLR0912, C901, FBT001
+class DefaultFormPopulator(FormPopulator):
+    """Default populator for other object types."""
+
+    def populate(
+        self,
+        field_name: str,
+        obj: Any,
+        _get_field_name_func: Callable[..., str],
+        _delimiter: str,
+        *,
+        explode: bool,  # noqa: ARG002
+    ) -> dict[str, list[str]]:
+        """Populate form data for default object types."""
+        return {field_name: [_val_to_string(obj)]}
+
+
+def get_form_populator(obj: Any) -> FormPopulator:
+    """Get the appropriate form populator based on object type."""
+    if isinstance(obj, msgspec.Struct):
+        return StructFormPopulator()
+    if isinstance(obj, dict):
+        return DictFormPopulator()
+    if isinstance(obj, list):
+        return ListFormPopulator()
+    return DefaultFormPopulator()
+
+
+def _populate_form(
+    field_name: str,
+    obj: Any,
+    get_field_name_func: Callable[..., str],
+    delimiter: str,
+    *,
+    explode: bool,
+) -> dict[str, list[str]]:
+    """Populate a form using the appropriate populator."""
+    if obj is None:
+        return {}
+
+    populator = get_form_populator(obj)
+    return populator.populate(
+        field_name,
+        obj,
+        get_field_name_func,
+        delimiter,
+        explode=explode,
+    )
+
+
+def _serialize_header(obj: Any, *, explode: bool) -> str:
     """Serialize a header."""
     if obj is None:
         return ""
 
+    serializer = _get_header_serializer(obj)
+    return serializer(obj, explode=explode)
+
+
+def _get_header_serializer(obj: Any) -> Callable[[Any, NamedArg(bool, "explode")], str]:
+    """Get the appropriate header serializer based on object type."""
     if isinstance(obj, msgspec.Struct):
-        items = []
-        obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
-        for obj_field in obj_fields:
-            obj_param_metadata = get_metadata(obj_field).get("header")
+        return _serialize_struct_header
+    if isinstance(obj, dict):
+        return _serialize_dict_header
+    if isinstance(obj, list):
+        return _serialize_list_header
+    return _serialize_simple_header
 
-            if not obj_param_metadata:
-                continue
 
-            obj_field_name = obj_param_metadata.get("field_name", obj_field.name)
-            if obj_field_name == "":
-                continue
+def _serialize_struct_header(obj: msgspec.Struct, *, explode: bool) -> str:
+    """Serialize a msgspec.Struct header."""
+    items = _get_struct_items(obj, explode=explode)
+    return ",".join(items) if items else ""
 
-            val = getattr(obj, obj_field.name)
-            if val is None:
-                continue
 
-            if explode:
-                items.append(f"{obj_field_name}={_val_to_string(val)}")
-            else:
-                items.append(obj_field_name)
-                items.append(_val_to_string(val))
+def _get_struct_items(obj: msgspec.Struct, *, explode: bool) -> list[str]:
+    """Get serialized items from a msgspec.Struct."""
+    items = []
+    for obj_field in msgspec.structs.fields(obj):
+        obj_param_metadata = get_metadata(obj_field).get("header")
+        if not obj_param_metadata:
+            continue
 
-        if len(items) > 0:
-            return ",".join(items)
-    elif isinstance(obj, dict):
-        items = []
+        obj_field_name = obj_param_metadata.get("field_name", obj_field.name)
+        if obj_field_name == "":
+            continue
 
-        for key, value in obj.items():
-            if value is None:
-                continue
+        val = getattr(obj, obj_field.name)
+        if val is None:
+            continue
 
-            if explode:
-                items.append(f"{key}={_val_to_string(value)}")
-            else:
-                items.append(key)
-                items.append(_val_to_string(value))
+        items.extend(_format_item(obj_field_name, val, explode=explode))
+    return items
 
-        if len(items) > 0:
-            return ",".join([str(item) for item in items])
-    elif isinstance(obj, list):
-        items = []
 
-        for value in obj:
-            if value is None:
-                continue
+def _serialize_dict_header(obj: dict[str, Any], *, explode: bool) -> str:
+    """Serialize a dictionary header."""
+    items = _get_dict_items(obj, explode=explode)
+    return ",".join(str(item) for item in items) if items else ""
 
-            items.append(_val_to_string(value))
 
-        if len(items) > 0:
-            return ",".join(items)
-    else:
-        return f"{_val_to_string(obj)}"
+def _get_dict_items(obj: dict[str, Any], *, explode: bool) -> list[str]:
+    """Get serialized items from a dictionary."""
+    items = []
+    for key, value in obj.items():
+        if value is not None:
+            items.extend(_format_item(key, value, explode=explode))
+    return items
 
-    return ""
+
+def _serialize_list_header(obj: list[Any], *, explode: bool) -> str:  # noqa: ARG001
+    """Serialize a list header."""
+    return ",".join(_val_to_string(value) for value in obj if value is not None)
+
+
+def _serialize_simple_header(obj: Any, *, explode: bool) -> str:  # noqa: ARG001
+    """Serialize a simple header."""
+    return _val_to_string(obj)
+
+
+def _format_item(key: str, value: Any, *, explode: bool) -> list[str]:
+    """Format a key-value pair for header serialization."""
+    if explode:
+        return [f"{key}={_val_to_string(value)}"]
+    return [key, _val_to_string(value)]
 
 
 def marshal_json(
