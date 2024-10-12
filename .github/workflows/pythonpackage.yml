@@ -107,8 +107,9 @@ jobs:
       - name: Combine coverage
         run: |
           ls -al reports
-          coverage combine reports
+          coverage combine reports/**/.coverage
           coverage xml
+          ls -al reports
       - name: Generate sonar properties
         run: |
           cat << EOF > sonar-project.properties
