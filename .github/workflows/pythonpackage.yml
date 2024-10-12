@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}
-          path: reports/.coverage
+          path: reports/coverage.xml
 
   coveralls-finish:
     needs: [python-test]
