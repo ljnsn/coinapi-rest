@@ -60,15 +60,19 @@ branch = true
 command_line = "--module pytest"
 data_file = "reports/.coverage"
 source = ["src"]
+# include = ["src/*"]
+# omit = ["tests/*"]
 
 [tool.coverage.paths]
-source = ["src/", "/home/runner/**/src", "D:\\**\\src"]
+source = ["src/"]
 
 [tool.coverage.report]
 fail_under = 50
 precision = 1
 show_missing = true
 skip_covered = true
+# include = ["src/*"]
+# omit = ["tests/*"]
 
 [tool.coverage.xml]
 output = "reports/coverage.xml"
