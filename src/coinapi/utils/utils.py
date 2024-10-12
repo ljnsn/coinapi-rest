@@ -21,6 +21,7 @@ from xmlrpc.client import boolean
 
 import httpx
 import msgspec
+from mypy_extensions import NamedArg
 from typing_inspect import is_optional_type
 
 NOT_SUPPORTED = "not supported"
@@ -495,8 +496,8 @@ def get_headers(headers_params: msgspec.Struct | None) -> dict[str, str]:
             continue
 
         value = _serialize_header(
-            metadata.get("explode", False),
             getattr(headers_params, field.name),
+            explode=metadata.get("explode", False),
         )
 
         if value != "":
@@ -1087,66 +1088,82 @@ def _populate_form(
     )
 
 
-def _serialize_header(explode: bool, obj: Any) -> str:  # noqa: PLR0912, C901, FBT001
+def _serialize_header(obj: Any, *, explode: bool) -> str:
     """Serialize a header."""
     if obj is None:
         return ""
 
+    serializer = _get_header_serializer(obj)
+    return serializer(obj, explode=explode)
+
+
+def _get_header_serializer(obj: Any) -> Callable[[Any, NamedArg(bool, "explode")], str]:
+    """Get the appropriate header serializer based on object type."""
     if isinstance(obj, msgspec.Struct):
-        items = []
-        obj_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(obj)
-        for obj_field in obj_fields:
-            obj_param_metadata = get_metadata(obj_field).get("header")
+        return _serialize_struct_header
+    if isinstance(obj, dict):
+        return _serialize_dict_header
+    if isinstance(obj, list):
+        return _serialize_list_header
+    return _serialize_simple_header
 
-            if not obj_param_metadata:
-                continue
 
-            obj_field_name = obj_param_metadata.get("field_name", obj_field.name)
-            if obj_field_name == "":
-                continue
+def _serialize_struct_header(obj: msgspec.Struct, *, explode: bool) -> str:
+    """Serialize a msgspec.Struct header."""
+    items = _get_struct_items(obj, explode=explode)
+    return ",".join(items) if items else ""
 
-            val = getattr(obj, obj_field.name)
-            if val is None:
-                continue
 
-            if explode:
-                items.append(f"{obj_field_name}={_val_to_string(val)}")
-            else:
-                items.append(obj_field_name)
-                items.append(_val_to_string(val))
+def _get_struct_items(obj: msgspec.Struct, *, explode: bool) -> list[str]:
+    """Get serialized items from a msgspec.Struct."""
+    items = []
+    for obj_field in msgspec.structs.fields(obj):
+        obj_param_metadata = get_metadata(obj_field).get("header")
+        if not obj_param_metadata:
+            continue
 
-        if len(items) > 0:
-            return ",".join(items)
-    elif isinstance(obj, dict):
-        items = []
+        obj_field_name = obj_param_metadata.get("field_name", obj_field.name)
+        if obj_field_name == "":
+            continue
 
-        for key, value in obj.items():
-            if value is None:
-                continue
+        val = getattr(obj, obj_field.name)
+        if val is None:
+            continue
 
-            if explode:
-                items.append(f"{key}={_val_to_string(value)}")
-            else:
-                items.append(key)
-                items.append(_val_to_string(value))
+        items.extend(_format_item(obj_field_name, val, explode=explode))
+    return items
 
-        if len(items) > 0:
-            return ",".join([str(item) for item in items])
-    elif isinstance(obj, list):
-        items = []
 
-        for value in obj:
-            if value is None:
-                continue
+def _serialize_dict_header(obj: dict[str, Any], *, explode: bool) -> str:
+    """Serialize a dictionary header."""
+    items = _get_dict_items(obj, explode=explode)
+    return ",".join(str(item) for item in items) if items else ""
 
-            items.append(_val_to_string(value))
 
-        if len(items) > 0:
-            return ",".join(items)
-    else:
-        return f"{_val_to_string(obj)}"
+def _get_dict_items(obj: dict[str, Any], *, explode: bool) -> list[str]:
+    """Get serialized items from a dictionary."""
+    items = []
+    for key, value in obj.items():
+        if value is not None:
+            items.extend(_format_item(key, value, explode=explode))
+    return items
 
-    return ""
+
+def _serialize_list_header(obj: list[Any], *, explode: bool) -> str:  # noqa: ARG001
+    """Serialize a list header."""
+    return ",".join(_val_to_string(value) for value in obj if value is not None)
+
+
+def _serialize_simple_header(obj: Any, *, explode: bool) -> str:  # noqa: ARG001
+    """Serialize a simple header."""
+    return _val_to_string(obj)
+
+
+def _format_item(key: str, value: Any, *, explode: bool) -> list[str]:
+    """Format a key-value pair for header serialization."""
+    if explode:
+        return [f"{key}={_val_to_string(value)}"]
+    return [key, _val_to_string(value)]
 
 
 def marshal_json(
