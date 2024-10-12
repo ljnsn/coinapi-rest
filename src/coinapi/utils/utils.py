@@ -366,62 +366,115 @@ def template_url(url_with_params: str, params: dict[str, str]) -> str:
     return url_with_params
 
 
+class QueryParamHandler(Protocol):
+    """Protocol for query parameter handlers."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Handle query parameter processing."""
+        ...
+
+
+class FormQueryParamHandler:
+    """Handler for form style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process form style query parameters."""
+        return _get_delimited_query_params(metadata, field_name, value, ",")
+
+
+class DeepObjectQueryParamHandler:
+    """Handler for deepObject style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process deepObject style query parameters."""
+        return _get_deep_object_query_params(metadata, field_name, value)
+
+
+class PipeDelimitedQueryParamHandler:
+    """Handler for pipeDelimited style query parameters."""
+
+    def handle(
+        self,
+        metadata: dict[str, Any],
+        field_name: str,
+        value: Any,
+    ) -> dict[str, list[str]]:
+        """Process pipeDelimited style query parameters."""
+        return _get_delimited_query_params(metadata, field_name, value, "|")
+
+
+def get_query_param_handler(style: str) -> QueryParamHandler:
+    """Get the appropriate query parameter handler based on style."""
+    handlers = {
+        "form": FormQueryParamHandler(),
+        "deepObject": DeepObjectQueryParamHandler(),
+        "pipeDelimited": PipeDelimitedQueryParamHandler(),
+    }
+    # Default to form style
+    return handlers.get(style, FormQueryParamHandler())  # type: ignore[return-value]
+
+
+def process_query_param(
+    field: msgspec.structs.FieldInfo,
+    value: Any,
+    _gbls: dict[str, dict[str, dict[str, Any]]] | None,
+) -> dict[str, list[str]]:
+    """Process a single query parameter."""
+    metadata = get_metadata(field).get("query_param", {})
+    field_name = metadata.get("field_name", field.name)
+
+    if metadata.get("serialization"):
+        serialized_params = _get_serialized_params(
+            metadata,
+            field.type,
+            field_name,
+            value,
+        )
+        return {key: [value] for key, value in serialized_params.items()}
+
+    style = metadata.get("style", "form")
+    handler = get_query_param_handler(style)
+    return handler.handle(metadata, field_name, value)
+
+
 def get_query_params(
-    clazz: msgspec.Struct,
+    clazz: type[msgspec.Struct],
     query_params: msgspec.Struct,
     gbls: dict[str, dict[str, dict[str, Any]]] | None = None,
 ) -> dict[str, list[str]]:
-    """Get query parameters."""
+    """Get query parameters for a request."""
     params: dict[str, list[str]] = {}
 
-    param_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(clazz)
-    for field in param_fields:
-        request_metadata = get_metadata(field).get("request")
-        if request_metadata is not None:
+    for field in msgspec.structs.fields(clazz):
+        if get_metadata(field).get("request") is not None:
             continue
 
-        metadata = get_metadata(field).get("query_param")
-        if not metadata:
+        if not get_metadata(field).get("query_param"):
             continue
 
-        param_name = field.name
-        value = getattr(query_params, param_name) if query_params is not None else None
+        value = getattr(query_params, field.name) if query_params is not None else None
+        value = _populate_from_globals(field.name, value, "queryParam", gbls)
 
-        value = _populate_from_globals(param_name, value, "queryParam", gbls)
+        if value is None:
+            continue
 
-        f_name = metadata.get("field_name")
-        serialization = metadata.get("serialization", "")
-        if serialization != "":
-            serialized_parms = _get_serialized_params(
-                metadata,
-                field.type,
-                f_name,
-                value,
-            )
-            for key, value in serialized_parms.items():
-                if key in params:
-                    params[key].extend(value)
-                else:
-                    params[key] = [value]
-        else:
-            style = metadata.get("style", "form")
-            if style == "deepObject":
-                params = {
-                    **params,
-                    **_get_deep_object_query_params(metadata, f_name, value),
-                }
-            elif style == "form":
-                params = {
-                    **params,
-                    **_get_delimited_query_params(metadata, f_name, value, ","),
-                }
-            elif style == "pipeDelimited":
-                params = {
-                    **params,
-                    **_get_delimited_query_params(metadata, f_name, value, "|"),
-                }
-            else:
-                raise NotImplementedError("not yet implemented")
+        params.update(process_query_param(field, value, gbls))
+
     return params
 
 

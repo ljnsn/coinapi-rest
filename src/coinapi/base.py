@@ -70,7 +70,7 @@ class Base:
         url = utils.generate_url(type(request), base_url, request.endpoint, request)
         headers = self._prepare_headers(request, accept_header_override)
         data, form = self._prepare_body(request)
-        query_params = utils.get_query_params(type(request), request) or None  # type: ignore[arg-type]
+        query_params = utils.get_query_params(type(request), request) or None
 
         return httpx.Request(
             request.method,
