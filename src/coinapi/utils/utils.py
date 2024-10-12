@@ -10,6 +10,7 @@ from enum import Enum
 from typing import (
     Any,
     ClassVar,
+    Protocol,
     Union,
     cast,
     get_args,
@@ -197,8 +198,129 @@ def get_metadata(field_info: msgspec.structs.FieldInfo) -> dict[str, Any]:
     return {}
 
 
-def generate_url(  # noqa: PLR0912, C901
-    clazz: msgspec.Struct,
+class PathParamHandler(Protocol):
+    """Protocol for path parameter handlers."""
+
+    def handle(self, param: Any, metadata: dict[str, Any]) -> str:
+        """Handle a path parameter."""
+        ...
+
+
+class ListParamHandler:
+    """Handler for list parameters."""
+
+    def handle(self, param: list[Any], _metadata: dict[str, Any]) -> str:
+        """Handle a list parameter."""
+        pp_vals = [_val_to_string(pp_val) for pp_val in param if pp_val is not None]
+        return ",".join(pp_vals)
+
+
+class DictParamHandler:
+    """Handler for dictionary parameters."""
+
+    def handle(self, param: dict[str, Any], metadata: dict[str, Any]) -> str:
+        """Handle a dictionary parameter."""
+        pp_vals = []
+        for pp_key, pp_value in param.items():
+            if pp_value is None:
+                continue
+            if metadata.get("explode"):
+                pp_vals.append(f"{pp_key}={_val_to_string(pp_value)}")
+            else:
+                pp_vals.append(f"{pp_key},{_val_to_string(pp_value)}")
+        return ",".join(pp_vals)
+
+
+class StructParamHandler:
+    """Handler for msgspec.Struct parameters."""
+
+    def handle(self, param: msgspec.Struct, metadata: dict[str, Any]) -> str:
+        """Handle a msgspec.Struct parameter."""
+        pp_vals = []
+        param_fields: tuple[msgspec.structs.FieldInfo, ...] = msgspec.structs.fields(
+            param,
+        )
+        for param_field in param_fields:
+            param_value_metadata = get_metadata(param_field).get("path_param")
+            if not param_value_metadata:
+                continue
+
+            parm_name = param_value_metadata.get("field_name", param_field.name)
+            param_field_val = getattr(param, param_field.name)
+            if param_field_val is None:
+                continue
+            if metadata.get("explode"):
+                pp_vals.append(f"{parm_name}={_val_to_string(param_field_val)}")
+            else:
+                pp_vals.append(f"{parm_name},{_val_to_string(param_field_val)}")
+        return ",".join(pp_vals)
+
+
+class DefaultParamHandler:
+    """Handler for default parameter types."""
+
+    def handle(
+        self,
+        param: str | complex | bool | Decimal,
+        _metadata: dict[str, Any],
+    ) -> str:
+        """Handle a default parameter type."""
+        return _val_to_string(param)
+
+
+def get_param_handler(param: Any) -> PathParamHandler:
+    """Get the appropriate parameter handler based on the parameter type."""
+    if isinstance(param, list):
+        return ListParamHandler()
+    if isinstance(param, dict):
+        return DictParamHandler()
+    if isinstance(param, msgspec.Struct):
+        return StructParamHandler()
+    return DefaultParamHandler()
+
+
+def handle_single_path_param(param: Any, metadata: dict[str, Any]) -> str:
+    """Handle a single path parameter."""
+    handler = get_param_handler(param)
+    return handler.handle(param, metadata)
+
+
+def serialize_param(
+    param: Any,
+    metadata: dict[str, Any],
+    field_type: type[Any],
+    field_name: str,
+) -> dict[str, str]:
+    """Serialize a parameter based on metadata."""
+    params: dict[str, str] = {}
+    serialization = metadata.get("serialization", "")
+    if serialization == "json":
+        params[metadata.get("field_name", field_name)] = marshal_json(param, field_type)
+    return params
+
+
+def replace_url_placeholder(path: str, field_name: str, value: str) -> str:
+    """Replace a placeholder in the URL path."""
+    return path.replace("{" + field_name + "}", value, 1)
+
+
+def is_path_param(field: msgspec.structs.FieldInfo) -> bool:
+    """Check if a field is a path parameter."""
+    return get_metadata(field).get("path_param") is not None
+
+
+def get_param_value(
+    field: msgspec.structs.FieldInfo,
+    path_params: msgspec.Struct | None,
+    gbls: dict[str, dict[str, dict[str, Any]]] | None,
+) -> Any:
+    """Get the parameter value from path_params or globals."""
+    param = getattr(path_params, field.name) if path_params is not None else None
+    return _populate_from_globals(field.name, param, "pathParam", gbls)
+
+
+def generate_url(
+    clazz: type[msgspec.Struct],
     server_url: str,
     path: str,
     path_params: msgspec.Struct | None,
@@ -209,94 +331,24 @@ def generate_url(  # noqa: PLR0912, C901
         clazz,
     )
     for field in path_param_fields:
-        request_metadata = get_metadata(field).get("request")
-        if request_metadata is not None:
+        if not is_path_param(field):
             continue
 
-        param_metadata = get_metadata(field).get("path_param")
-        if param_metadata is None:
-            continue
-
-        param = getattr(path_params, field.name) if path_params is not None else None
-        param = _populate_from_globals(field.name, param, "pathParam", gbls)
-
+        param = get_param_value(field, path_params, gbls)
         if param is None:
             continue
 
-        f_name = param_metadata.get("field_name", field.name)
-        serialization = param_metadata.get("serialization", "")
-        if serialization != "":
-            serialized_params = _get_serialized_params(
-                param_metadata,
-                field.type,
-                f_name,
-                param,
-            )
+        metadata = get_metadata(field).get("path_param", {})
+        f_name = metadata.get("field_name", field.name)
+        serialization = metadata.get("serialization", "")
+
+        if serialization:
+            serialized_params = serialize_param(param, metadata, field.type, f_name)
             for key, value in serialized_params.items():
-                path = path.replace("{" + key + "}", value, 1)
-        elif param_metadata.get("style", "simple") == "simple":
-            if isinstance(param, list):
-                pp_vals: list[str] = []
-                for pp_val in param:
-                    if pp_val is None:
-                        continue
-                    pp_vals.append(_val_to_string(pp_val))
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            elif isinstance(param, dict):
-                pp_vals = []
-                for pp_key in param:
-                    if param[pp_key] is None:
-                        continue
-                    if param_metadata.get("explode"):
-                        pp_vals.append(f"{pp_key}={_val_to_string(param[pp_key])}")
-                    else:
-                        pp_vals.append(f"{pp_key},{_val_to_string(param[pp_key])}")
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            elif not isinstance(param, str | int | float | complex | bool | Decimal):
-                pp_vals = []
-                param_fields: tuple[
-                    msgspec.structs.FieldInfo,
-                    ...,
-                ] = msgspec.structs.fields(param)
-                for param_field in param_fields:
-                    param_value_metadata = get_metadata(param_field).get(
-                        "path_param",
-                    )
-                    if not param_value_metadata:
-                        continue
-
-                    parm_name = param_value_metadata.get("field_name", field.name)
-
-                    param_field_val = getattr(param, param_field.name)
-                    if param_field_val is None:
-                        continue
-                    if param_metadata.get("explode"):
-                        pp_vals.append(
-                            f"{parm_name}={_val_to_string(param_field_val)}",
-                        )
-                    else:
-                        pp_vals.append(
-                            f"{parm_name},{_val_to_string(param_field_val)}",
-                        )
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    ",".join(pp_vals),
-                    1,
-                )
-            else:
-                path = path.replace(
-                    "{" + param_metadata.get("field_name", field.name) + "}",
-                    _val_to_string(param),
-                    1,
-                )
+                path = replace_url_placeholder(path, key, value)
+        elif metadata.get("style", "simple") == "simple":
+            serialized_value = handle_single_path_param(param, metadata)
+            path = replace_url_placeholder(path, f_name, serialized_value)
 
     return remove_suffix(server_url, "/") + path
 

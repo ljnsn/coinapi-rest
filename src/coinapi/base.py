@@ -67,7 +67,7 @@ class Base:
     ) -> httpx.Request:
         """Prepare an HTTP request."""
         base_url = utils.template_url(*self.sdk_configuration.get_server_details())
-        url = utils.generate_url(type(request), base_url, request.endpoint, request)  # type: ignore[arg-type]
+        url = utils.generate_url(type(request), base_url, request.endpoint, request)
         headers = self._prepare_headers(request, accept_header_override)
         data, form = self._prepare_body(request)
         query_params = utils.get_query_params(type(request), request) or None  # type: ignore[arg-type]
