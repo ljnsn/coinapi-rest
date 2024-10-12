@@ -8,6 +8,7 @@ from typing import Annotated, Any, Union
 
 import httpx
 import msgspec
+import pytest
 
 from coinapi.utils import utils
 
@@ -51,6 +52,77 @@ class TestSecurityClient:
         )
 
         assert client.headers["X-API-Key"] == "test_api_key"
+
+    def test_parse_security_scheme_value_oauth2(self) -> None:
+        """Test parsing security scheme value for OAuth2."""
+        client = utils.SecurityClient()
+        scheme_metadata = {"type": "oauth2", "sub_type": "other"}
+        security_metadata = {"field_name": "Authorization"}
+        utils._parse_security_scheme_value(
+            client,
+            scheme_metadata,
+            security_metadata,
+            "test_token",
+        )
+        assert client.headers["Authorization"] == "Bearer test_token"
+
+    def test_parse_security_scheme_value_open_id_connect(self) -> None:
+        """Test parsing security scheme value for OpenID Connect."""
+        client = utils.SecurityClient()
+        scheme_metadata = {"type": "openIdConnect"}
+        security_metadata = {"field_name": "Authorization"}
+        utils._parse_security_scheme_value(
+            client,
+            scheme_metadata,
+            security_metadata,
+            "test_token",
+        )
+        assert client.headers["Authorization"] == "Bearer test_token"
+
+    def test_parse_security_scheme_value_api_key_query(self) -> None:
+        """Test parsing security scheme value for API key in query."""
+        client = utils.SecurityClient()
+        scheme_metadata = {"type": "apiKey", "sub_type": "query"}
+        security_metadata = {"field_name": "api_key"}
+        utils._parse_security_scheme_value(
+            client,
+            scheme_metadata,
+            security_metadata,
+            "test_key",
+        )
+        assert client.query_params["api_key"] == "test_key"
+
+    def test_parse_security_scheme_value_unsupported(self) -> None:
+        """Test parsing security scheme value for unsupported type."""
+        client = utils.SecurityClient()
+        scheme_metadata = {"type": "unsupported"}
+        security_metadata = {"field_name": "test"}
+        with pytest.raises(ValueError, match="not supported"):
+            utils._parse_security_scheme_value(
+                client,
+                scheme_metadata,
+                security_metadata,
+                "test",
+            )
+
+
+class TestUtilityFunctions:
+    """Tests for utility functions."""
+
+    def test_apply_bearer(self) -> None:
+        """Test applying bearer token."""
+        assert utils._apply_bearer("test_token") == "Bearer test_token"
+        assert utils._apply_bearer("Bearer test_token") == "Bearer test_token"
+
+    def test_get_metadata(self) -> None:
+        """Test getting metadata from a field."""
+
+        class TestStruct(msgspec.Struct):
+            field: Annotated[str, msgspec.Meta(extra={"test": "metadata"})]
+
+        field_info = msgspec.structs.fields(TestStruct)[0]
+        metadata = utils.get_metadata(field_info)
+        assert metadata == {"test": "metadata"}
 
 
 class TestConfigureSecurityClient:
@@ -281,6 +353,16 @@ class TestSerializeParam:
         result = utils.serialize_param(42, {}, int, "test")
         assert result == {}
 
+    def test_serialize_param_unsupported(self) -> None:
+        """Test serializing param with unsupported serialization."""
+        result = utils.serialize_param(
+            "test",
+            {"serialization": "unsupported"},
+            str,
+            "test",
+        )
+        assert result == {}
+
 
 class TestReplaceUrlPlaceholder:
     """Tests for replace_url_placeholder."""
@@ -338,6 +420,17 @@ class TestGetParamValue:
         gbls = {"parameters": {"pathParam": {"param": "global_value"}}}
         result = utils.get_param_value(field, None, gbls)
         assert result == "global_value"
+
+    def test_get_param_value_from_globals_none(self) -> None:
+        """Test getting param value from globals when it's None."""
+
+        class PathParams(msgspec.Struct):
+            param: str
+
+        field = msgspec.structs.fields(PathParams)[0]
+        gbls = {"parameters": {"pathParam": {"param": None}}}
+        result = utils.get_param_value(field, None, gbls)
+        assert result is None
 
 
 class TestGenerateUrl:
@@ -485,6 +578,21 @@ class TestProcessQueryParam:
 
         assert result == {"f1": ["test"], "f2": ["42"]}
 
+    def test_process_query_param_pipe_delimited(self) -> None:
+        """Test processing query param with pipeDelimited style."""
+
+        class QueryParams(msgspec.Struct):
+            param: Annotated[
+                list[str],
+                msgspec.Meta(
+                    extra={"query_param": {"style": "pipeDelimited", "explode": False}},
+                ),
+            ]
+
+        field = msgspec.structs.fields(QueryParams)[0]
+        result = utils.process_query_param(field, ["a", "b", "c"], None)
+        assert result == {"param": ["a|b|c"]}
+
 
 class TestGetQueryParams:
     """Tests for get_query_params."""
@@ -631,6 +739,16 @@ class TestSerializeContentType:
         assert result[2][0][0] == "file"
         assert result[2][0][1][0] == "test.txt"
         assert result[2][0][1][1] == b"content"
+
+    def test_serialize_content_type_invalid(self) -> None:
+        """Test serializing content type with invalid media type."""
+        with pytest.raises(ValueError, match="invalid request body type"):
+            utils.serialize_content_type(
+                "field",
+                dict,
+                "invalid/media-type",
+                {"key": "value"},  # type: ignore[arg-type]
+            )
 
 
 class TestSerializeFormData:
@@ -860,6 +978,23 @@ class TestSerializeMultipartForm:
         assert any(item[0] == "file_field" for item in form)
         assert any(item[0] == "json_field" for item in form)
         assert any(item[0] == "regular_field" for item in form)
+
+    def test_serialize_multipart_form_invalid_file(self) -> None:
+        """Test serializing multipart form with invalid file."""
+
+        class InvalidFile(msgspec.Struct):
+            invalid: str
+
+        class MultipartRequest(msgspec.Struct):
+            file: Annotated[
+                InvalidFile,
+                msgspec.Meta(extra={"multipart_form": {"file": True}}),
+            ]
+
+        request = MultipartRequest(file=InvalidFile(invalid="test"))
+
+        with pytest.raises(ValueError, match="Invalid multipart/form-data file"):
+            utils.serialize_multipart_form("multipart/form-data", request)
 
 
 class TestMultipartFormSerializer:
