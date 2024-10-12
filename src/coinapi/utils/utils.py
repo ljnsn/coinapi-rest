@@ -9,6 +9,7 @@ from decimal import Decimal
 from email.message import Message
 from enum import Enum
 from typing import (
+    Annotated,
     Any,
     Protocol,
     Union,
@@ -644,6 +645,9 @@ def serialize_request_body(
         for field in msgspec.structs.fields(request)
         if field.name == request_field_name
     ).type
+
+    if get_origin(request_type) is Annotated:
+        request_type = get_args(request_type)[0]
 
     if request_val is None and is_optional_type(request_type):
         return None, None, None
