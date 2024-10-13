@@ -1,6 +1,6 @@
 # CoinAPI REST
 
-[![Coverage Status](https://coveralls.io/repos/github/ljnsn/coinapi-rest/badge.svg?branch=ci/coveralls)](https://coveralls.io/github/ljnsn/coinapi-rest?branch=ci/coveralls)
+[![Coverage Status](https://coveralls.io/repos/github/ljnsn/coinapi-rest/badge.svg?branch=main)](https://coveralls.io/github/ljnsn/coinapi-rest?branch=main)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ljnsn_coinapi-rest&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ljnsn_coinapi-rest)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![image](https://img.shields.io/pypi/v/coinapi-rest)](https://pypi.python.org/pypi/coinapi-rest)
