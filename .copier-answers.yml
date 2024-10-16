@@ -1,0 +1,25 @@
+# Changes here will be overwritten by Copier
+_commit: v0.0.3
+_src_path: git@github.com:ljnsn/copier-python-poly.git
+author_email: info@ljnsn.com
+author_name: ljnsn
+ci: true
+ci_provider: github
+commitizen: true
+coverage: true
+cz_gitmoji: true
+description: CoinAPI Python REST Client
+license: MIT
+loguru: false
+maximum_python_version: ''
+minimum_python_version: '3.10'
+mypy: true
+package_manager: uv
+pre_commit: true
+project_name: coinapi-rest
+project_snake: coinapi
+pytest: true
+ruff: true
+sqlalchemy: false
+structure: src
+web_app: false
