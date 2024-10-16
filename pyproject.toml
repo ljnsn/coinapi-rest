@@ -112,6 +112,12 @@ ignore = [
   "TD001",
   # Line contains FIXME, consider resolving the issue
   "FIX001",
+  # from * used; unable to detect undefined names
+  "F403",
+  # may be undefined, or defined from star imports
+  "F405",
+  # Docstring contains ambiguous `’`
+  "RUF002",
   #############################################################################
   # Rules conflicting with `ruff format`
   # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
