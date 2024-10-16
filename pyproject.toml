@@ -189,6 +189,7 @@ ban-relative-imports = "all"
 classmethod-decorators = ["classmethod"]
 
 [tool.mypy]
+mypy_path = ["src", "tests"]
 namespace_packages = true
 explicit_package_bases = true
 junit_xml = "reports/mypy.xml"
