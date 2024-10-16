@@ -4,10 +4,10 @@ set -e
 set -x
 
 if [ "$1" == "--network" ]; then
-  coverage run -m pytest -m 'network'
+  uv run coverage run -m pytest -m 'network'
 else
-  coverage run -m pytest -m 'not network'
+  uv run coverage run -m pytest -m 'not network'
 fi
 
-coverage report
-coverage xml
+uv run coverage report
+uv run coverage xml
