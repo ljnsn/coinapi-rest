@@ -1,9 +1,7 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
-
 default_install_hook_types: [commit-msg, pre-commit]
-default_stages: [commit, manual]
+default_stages: [pre-commit, manual]
 fail_fast: true
+minimum_pre_commit_version: "1.4.3"
 
 repos:
   - repo: meta
@@ -18,10 +16,10 @@ repos:
       - id: check-ast
       - id: check-builtin-literals
       - id: check-case-conflict
-      # - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-json
       - id: check-merge-conflict
+        args: [--assume-in-merge]
       - id: check-shebang-scripts-are-executable
       - id: check-symlinks
       - id: check-toml
@@ -35,9 +33,6 @@ repos:
         types: [python]
       - id: fix-byte-order-marker
       - id: mixed-line-ending
-      # - id: name-tests-test
-      #   args: [--pytest-test-first]
-      #   exclude: ^workspaces/.+/tests/(factories|fakes).py$
       - id: trailing-whitespace
         types: [python]
 
@@ -71,6 +66,13 @@ repos:
 
   - repo: local
     hooks:
+      # Prevent committing .rej files
+      - id: forbidden-files
+        name: forbidden files
+        entry: found Copier update rejection files; review and remove them before merging.
+        language: fail
+        files: "\\.rej$"
+
       - id: ruff
         name: Fix with ruff
         entry: ruff check
