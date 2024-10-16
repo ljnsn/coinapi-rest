@@ -36,7 +36,7 @@ jobs:
         run: uv sync --only-dev --frozen
 
       - name: Lint
-        run: python -m pdm run lint
+        run: uv run ./scripts/lint.sh
 
       - name: Archive lint reports
         uses: actions/upload-artifact@v4
@@ -72,7 +72,7 @@ jobs:
         run: uv sync --only-dev --frozen
 
       - name: Test
-        run: python -m pdm run test
+        run: uv run ./scripts/test.sh
 
       - name: Coveralls Parallel
         uses: coverallsapp/github-action@v2
