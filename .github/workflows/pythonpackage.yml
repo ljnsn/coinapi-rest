@@ -51,9 +51,6 @@ jobs:
         platform: [ubuntu-latest, windows-latest]
       fail-fast: false
     runs-on: ${{ matrix.platform }}
-    defaults:
-      run:
-        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -75,7 +72,7 @@ jobs:
         run: uv sync --only-dev --frozen
 
       - name: Test
-        run: uv run ./scripts/test.sh
+        run: ./scripts/test.sh
 
       - name: Coveralls Parallel
         uses: coverallsapp/github-action@v2
