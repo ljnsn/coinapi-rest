@@ -3,6 +3,7 @@
 import base64
 import datetime as dt
 import enum
+from collections.abc import Iterator
 from decimal import Decimal
 from typing import Annotated, Any, Union
 
@@ -11,6 +12,14 @@ import msgspec
 import pytest
 
 from coinapi.utils import utils
+
+
+@pytest.fixture(name="http_client")
+def http_client_fixture() -> Iterator[httpx.Client]:
+    """Fixture for HTTP client."""
+    http_client = httpx.Client()
+    yield http_client
+    http_client.close()
 
 
 class TestSecurityClient:
@@ -23,10 +32,9 @@ class TestSecurityClient:
         assert client.timeout == 60
         assert isinstance(client.limits, httpx.Limits)
 
-    def test_send_with_client(self) -> None:
+    def test_send_with_client(self, http_client: httpx.Client) -> None:
         """Test send method with a client."""
-        mock_client = httpx.Client()
-        client = utils.SecurityClient(client=mock_client)
+        client = utils.SecurityClient(client=http_client)
         request = httpx.Request("GET", "https://example.com")
         response = client.send(request)
         assert isinstance(response, httpx.Response)
@@ -492,10 +500,9 @@ class TestTemplateUrl:
         assert client.timeout == 60
         assert isinstance(client.limits, httpx.Limits)
 
-    def test_send_with_client(self) -> None:
+    def test_send_with_client(self, http_client: httpx.Client) -> None:
         """Test send method with a client."""
-        mock_client = httpx.Client()
-        client = utils.SecurityClient(client=mock_client)
+        client = utils.SecurityClient(client=http_client)
         request = httpx.Request("GET", "https://example.com")
         response = client.send(request)
         assert isinstance(response, httpx.Response)
