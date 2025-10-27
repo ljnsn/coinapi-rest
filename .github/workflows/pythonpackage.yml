@@ -39,7 +39,7 @@ jobs:
         run: uv run ./scripts/lint.sh
 
       - name: Archive lint reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lint-reports
           path: reports
@@ -82,7 +82,7 @@ jobs:
           parallel: true
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}
           path: reports/.coverage
